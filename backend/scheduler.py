@@ -38,6 +38,7 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 import channel_engine  # noqa: E402
+import notices         # noqa: E402
 
 # Shared with pipeline_router: any endpoint that spawns create.py acquires this so
 # a manual deploy and a scheduler cycle never touch Tunarr at the same time.
@@ -167,7 +168,7 @@ def _run_cycle_blocking(apply: bool, only: int = None) -> dict:
         return summary
 
     try:
-        movie_map, show_map = channel_engine.build_library_index(tunarr_url)
+        movie_map, show_map, id_index = channel_engine.build_library_index_with_ids(tunarr_url)
     except channel_engine.ChannelEngineError as e:
         summary["error"] = f"library index failed: {e}"
         return summary
@@ -190,12 +191,15 @@ def _run_cycle_blocking(apply: bool, only: int = None) -> dict:
     for ch in live:
         number = ch.get("number")
         name = ch.get("name", "Unnamed")
+        report = {}
         resolved, _missing = channel_engine.resolve_content(
             ch.get("content", []), movie_map, show_map,
             plex_url=plex_url, plex_token=plex_token,
             plex_sections=plex_sections, collection_cache=collection_cache,
-            franchise_index=franchise_index,
+            franchise_index=franchise_index, id_index=id_index, report=report,
         )
+        if apply:  # a dry run isn't a real check, so it must not rewrite what the person sees
+            notices.record(DATA_DIR, number, report)
         fresh_ids = _program_ids(resolved)
 
         tch = channel_engine.find_channel_by_number(tunarr_url, number)

@@ -27,7 +27,7 @@ from channel_engine import (
     set_tunarr_auth_from_config,
     SHUFFLE_MAP,
     api,
-    build_library_index,
+    build_library_index_with_ids,
     build_schedule,
     get_plex_sections,
     get_transcode_config,
@@ -250,7 +250,7 @@ def main():
     # ── Build library index ────────────────────────────────────────────────────
     print("\nIndexing Tunarr library...")
     try:
-        movie_map, show_map = build_library_index(tunarr_url)
+        movie_map, show_map, id_index = build_library_index_with_ids(tunarr_url)
     except ChannelEngineError as e:
         print(f"ERROR: {e}")
         sys.exit(1)
@@ -292,7 +292,7 @@ def main():
             content_list, movie_map, show_map,
             plex_url=plex_url, plex_token=plex_token,
             plex_sections=plex_sections, collection_cache=collection_cache,
-            franchise_index=franchise_index,
+            franchise_index=franchise_index, id_index=id_index,
         )
 
         if not resolved:

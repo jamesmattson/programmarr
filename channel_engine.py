@@ -221,20 +221,138 @@ def _no_plex_source_error(tunarr_url):
     )
 
 
-def build_library_index(tunarr_url):
+# ── Library index ──────────────────────────────────────────────────────────────
+#
+# Two views of the same scan:
+#   - movie_map / show_map: keyed by TITLE (what a person types). One entry per title,
+#     so two things sharing a title collapse into one — fine for typing, useless for
+#     telling The Office US from UK, or the two Aladdins, apart.
+#   - id_index: keyed by each item's own unique numbers. Nothing collapses, because
+#     no two different movies/shows share a number. This is what saved channels use.
+#
+# An item's numbers ("ids"): TMDB (the outside movie/TV database — survives a rename
+# or a Plex re-add), Plex's own id, and Tunarr's own id. Items no public database
+# knows about (family videos) have only the last two, which is why both are kept.
+
+_ID_PRIORITY = ("tmdb", "plex", "tunarr")
+
+
+def _identifier_map(obj):
+    """{'tmdb': '2316', 'plex': '110865', ...} from a Tunarr item's `identifiers` list.
+    A Tunarr that doesn't send the list (older versions) just yields {}."""
+    out = {}
+    for ident in (obj or {}).get("identifiers") or []:
+        kind, value = ident.get("type"), ident.get("id")
+        if kind and value and kind not in out:
+            out[kind] = str(value)
+    return out
+
+
+def _ids_for(obj, tunarr_id):
+    ids = _identifier_map(obj)
+    if ids.get("plex"):
+        # Plex ids are only unique per Plex server; two servers can reuse a number.
+        ids["plex"] = f"{obj.get('mediaSourceId', '')}:{ids['plex']}"
+    if tunarr_id:
+        ids["tunarr"] = str(tunarr_id)
+    # Keep only the numbers we actually look things up by, so what gets saved into a
+    # channel stays small.
+    return {s: ids[s] for s in _ID_PRIORITY if s in ids}
+
+
+def _movie_item(p):
+    prog = p.get("program", {})
+    return {"type": "Movie", "title": prog.get("title", ""), "programs": [p],
+            "ids": _ids_for(prog, p.get("id") or prog.get("uuid")), "year": prog.get("year")}
+
+
+def _show_item(show, show_id):
+    return {"type": "TV", "title": show.get("title", ""), "showId": show_id, "programs": [],
+            "ids": _ids_for(show, show_id), "year": show.get("year")}
+
+
+def _best_copy(items):
+    """Several library copies of the SAME thing (an HD and a 4K library, say): keep the
+    one with the most playable programs, so a dead copy never shadows the real one."""
+    return max(items, key=lambda it: _playable_count(it["programs"]))
+
+
+def _build_id_index(movie_items, show_items):
+    kinds = {"movie": movie_items, "show": show_items}
+    by_id = {"movie": {}, "show": {}}
+    for kind, items in kinds.items():
+        for item in items:
+            for source in _ID_PRIORITY:
+                value = item["ids"].get(source)
+                if value:
+                    by_id[kind].setdefault((source, value), []).append(item)
+        for key, items_for_key in by_id[kind].items():
+            by_id[kind][key] = _best_copy(items_for_key)
+
+    # Plex's own answer about a collection carries a bare ratingKey, with no idea which
+    # Tunarr media source it belongs to — so also index Plex ids without that prefix.
+    by_plex_rating = {"movie": {}, "show": {}}
+    for kind in by_id:
+        for (source, value), item in by_id[kind].items():
+            if source == "plex":
+                by_plex_rating[kind].setdefault(value.split(":", 1)[-1], []).append(item)
+    by_title = {"movie": {}, "show": {}}
+    for kind, items in kinds.items():
+        for item in items:
+            key = item["title"].lower().strip()
+            if key:
+                by_title[kind].setdefault(key, []).append(item)
+    return {"by_id": by_id, "all": kinds, "by_plex_rating": by_plex_rating, "by_title": by_title}
+
+
+def find_by_plex_id(kind, plex_id, id_index):
+    """The library item with this bare Plex ratingKey, or None. Also None when two
+    different Plex servers both have that number — better to say "don't know" than to
+    pick one; the caller falls back to title + year."""
+    found = id_index["by_plex_rating"].get(kind, {}).get(str(plex_id), [])
+    return found[0] if len(found) == 1 else None
+
+
+def _scan_tunarr_library(tunarr_url):
+    """One pass over every enabled Plex-backed library Tunarr has — movies, TV shows,
+    and "Other Videos" (family videos and the like). Builds the raw structures that
+    build_library_index (titles only, the original contract) and
+    build_library_index_with_ids (titles + ids) each shape into their own return, so a
+    library is fetched once whichever a caller uses."""
     plex_sources = get_plex_sources(tunarr_url)
     if not plex_sources:
         raise _no_plex_source_error(tunarr_url)
 
     movie_map = {}
+    movie_items = []      # every movie / other video, one entry each — never merged by title
     # title-key -> {title, by_lib: {lib_id: {showId, programs}}}
     # Collected across ALL Plex sources before picking the best copy per show.
     tv_candidates = {}
+    shows_by_uuid = {}    # every distinct show by its own Tunarr id — never merged by title
+    other_libs = []       # "Other Videos" libraries, read after the real movie libraries
     # api() reports every failure as None, and treating that as "no programs"
     # turns an outage into a silent empty index — which downstream looks like a
     # library with no content and would deploy channels with nothing on them.
     failed_libs = []
     attempted_libs = 0
+
+    def _fetch(lib, source_name):
+        nonlocal attempted_libs
+        programs = api(tunarr_url, "GET", f"/api/media-libraries/{lib['id']}/programs", timeout=120)
+        if programs is None:
+            failed_libs.append(f"{source_name}/{lib.get('name', lib['id'])}")
+            return None
+        attempted_libs += 1
+        return programs
+
+    def _index_movies(programs):
+        for p in programs:
+            title = p.get("program", {}).get("title", "")
+            if title:
+                key = title.lower().strip()
+                if key not in movie_map:
+                    movie_map[key] = p
+            movie_items.append(_movie_item(p))
 
     for source in plex_sources:
         source_name = source.get("name", "Plex")
@@ -244,30 +362,22 @@ def build_library_index(tunarr_url):
         # the first source/library silently drops whole libraries.
         movie_libs = [l for l in libs if l.get("mediaType") in ("movie", "movies") and l.get("enabled")]
         tv_libs    = [l for l in libs if l.get("mediaType") == "shows"              and l.get("enabled")]
+        other_libs += [(source_name, l) for l in libs
+                       if l.get("mediaType") == "other_videos" and l.get("enabled")]
 
         if movie_libs:
             print(f"  Indexing movies ({source_name})...")
             for lib in movie_libs:
-                programs = api(tunarr_url, "GET", f"/api/media-libraries/{lib['id']}/programs", timeout=120)
-                if programs is None:
-                    failed_libs.append(f"{source_name}/{lib.get('name', lib['id'])}")
-                    continue
-                attempted_libs += 1
-                for p in programs:
-                    title = p.get("program", {}).get("title", "")
-                    if title:
-                        key = title.lower().strip()
-                        if key not in movie_map:
-                            movie_map[key] = p
+                programs = _fetch(lib, source_name)
+                if programs is not None:
+                    _index_movies(programs)
 
         if tv_libs:
             print(f"  Indexing TV shows ({source_name})...")
             for lib in tv_libs:
-                programs = api(tunarr_url, "GET", f"/api/media-libraries/{lib['id']}/programs", timeout=120)
+                programs = _fetch(lib, source_name)
                 if programs is None:
-                    failed_libs.append(f"{source_name}/{lib.get('name', lib['id'])}")
                     continue
-                attempted_libs += 1
                 for p in programs:
                     prog = p.get("program", {})
                     show = prog.get("show", {})
@@ -280,6 +390,24 @@ def build_library_index(tunarr_url):
                     entry = c["by_lib"].setdefault(lib["id"], {"showId": show_id, "programs": []})
                     entry["programs"].append(p)
 
+                    item = shows_by_uuid.get(show_id)
+                    if item is None:
+                        item = shows_by_uuid[show_id] = _show_item(show, show_id)
+                    item["programs"].append(p)
+
+    # Family videos and the like: Tunarr files them as "other_videos", and a movie slot
+    # schedules them like movies. Read after the real movie libraries so that, in the
+    # by-title view (first one wins), a home video can never displace a same-named movie.
+    for source_name, lib in other_libs:
+        print(f"  Indexing other videos ({source_name}/{lib.get('name', lib['id'])})...")
+        programs = _fetch(lib, source_name)
+        if programs is not None:
+            _index_movies(programs)
+
+    return movie_map, movie_items, tv_candidates, list(shows_by_uuid.values()), failed_libs, attempted_libs
+
+
+def _check_failed_libs(failed_libs, attempted_libs):
     if failed_libs and attempted_libs == 0:
         raise ChannelEngineError(
             "Could not read any library from Tunarr (" + ", ".join(failed_libs) + "). "
@@ -293,20 +421,151 @@ def build_library_index(tunarr_url):
               + ", ".join(failed_libs))
         print("  ! Channels built now may be missing content from those libraries.")
 
-    print(f"  Indexed {len(movie_map)} movies")
 
-    # For each show pick the single copy (across all sources/libraries) with the most
-    # PLAYABLE episodes, so a dead duplicate never shadows the real one or inflates the
-    # live-channel diff into churn.
+def _collapse_show_map(tv_candidates):
+    """For each show TITLE pick the single copy (across all sources/libraries) with the
+    most PLAYABLE episodes, so a dead duplicate never shadows the real one or inflates
+    the live-channel diff into churn. Two different shows sharing a title collapse into
+    one here — use the id index (build_library_index_with_ids) when that matters."""
     show_map = {}
     def _playable(entry):
         return sum(1 for p in entry["programs"] if p.get("program", {}).get("state") != "missing")
     for key, c in tv_candidates.items():
         best = max(c["by_lib"].values(), key=_playable)
         show_map[key] = {"title": c["title"], "showId": best["showId"], "programs": best["programs"]}
-    print(f"  Indexed {len(show_map)} TV shows")
+    return show_map
 
+
+def build_library_index(tunarr_url):
+    movie_map, _movie_items, tv_candidates, _show_items, failed_libs, attempted_libs = \
+        _scan_tunarr_library(tunarr_url)
+    _check_failed_libs(failed_libs, attempted_libs)
+    print(f"  Indexed {len(movie_map)} movies")
+    show_map = _collapse_show_map(tv_candidates)
+    print(f"  Indexed {len(show_map)} TV shows")
     return movie_map, show_map
+
+
+def build_library_index_with_ids(tunarr_url):
+    """Like build_library_index, plus the id index (see the note above) built from the
+    same scan. Returns (movie_map, show_map, id_index)."""
+    movie_map, movie_items, tv_candidates, show_items, failed_libs, attempted_libs = \
+        _scan_tunarr_library(tunarr_url)
+    _check_failed_libs(failed_libs, attempted_libs)
+    print(f"  Indexed {len(movie_map)} movies")
+    show_map = _collapse_show_map(tv_candidates)
+    print(f"  Indexed {len(show_map)} TV shows")
+    return movie_map, show_map, _build_id_index(movie_items, show_items)
+
+
+def find_by_title(title, id_index, kind=None):
+    """Every distinct movie/show whose title is exactly `title` (case-insensitive) —
+    for the Add box, which has to ask "which one?" when there is more than one.
+
+    Two library copies of the same thing (an HD and a 4K library) count as one; the
+    playable copy is returned. Movies first, then shows, oldest first."""
+    want = (title or "").lower().strip()
+    if not want:
+        return []
+    found = []
+    for k in ((kind,) if kind else ("movie", "show")):
+        groups = {}
+        by_title = id_index.get("by_title")
+        pool = (by_title[k].get(want, []) if by_title is not None
+                else [it for it in id_index["all"].get(k, []) if it["title"].lower().strip() == want])
+        for item in pool:
+            identity = item["ids"].get("tmdb") or item["ids"].get("tunarr") or id(item)
+            groups.setdefault(identity, []).append(item)
+        picked = [_best_copy(items) for items in groups.values()]
+        found += sorted(picked, key=lambda it: (it.get("year") or 0, it["title"]))
+    return found
+
+
+def entry_for_item(item):
+    """The channel entry that pins exactly this item: the developer's own typed ref plus
+    the item's year and numbers."""
+    kind = "movie" if item["type"] == "Movie" else "show"
+    entry = {kind: item["title"], "ids": item["ids"]}
+    if item.get("year"):
+        entry["year"] = item["year"]
+    return entry
+
+
+def _find_ambiguity(title, kind, movie_map, show_map, id_index):
+    """If `title` (optionally limited to a movie/show) names more than one thing in the
+    library, describe the choice: the options — each with its ready-to-save pinned entry —
+    and which one the channel plays right now (title lookups keep only one)."""
+    options = find_by_title(title, id_index, kind)
+    if len(options) < 2:
+        return None
+    playing = resolve_title(title, movie_map, show_map, kind=kind)
+    current = None
+    if playing:
+        playing_id = playing["showId"] if playing["type"] == "TV" else playing["programs"][0].get("id")
+        current = next((i for i, o in enumerate(options) if o["ids"].get("tunarr") == str(playing_id)), None)
+    return {
+        "label": title, "kind": kind, "current": current,
+        "options": [{"kind": "movie" if o["type"] == "Movie" else "show", "title": o["title"],
+                     "year": o.get("year"), "entry": entry_for_item(o)} for o in options],
+    }
+
+
+def apply_healed(content, healed):
+    """A channel's content with each entry that resolve_content re-found through a backup
+    number (report["healed"]) refreshed to the item's current numbers, year and title —
+    so the next resolve matches on the first number again instead of healing every time.
+    An entry that is no longer exactly what was resolved (the person edited the channel in
+    between) is left alone."""
+    by_entry = {json.dumps(h["entry"], sort_keys=True): h for h in healed}
+    out = []
+    for entry in content:
+        h = by_entry.get(json.dumps(entry, sort_keys=True)) if isinstance(entry, dict) else None
+        if h is None:
+            out.append(entry)
+            continue
+        new = dict(entry)
+        new[h["kind"]] = h["title"]
+        new["ids"] = h["ids"]
+        if h.get("year"):
+            new["year"] = h["year"]
+        out.append(new)
+    return out
+
+
+def resolve_by_ids(kind, ids, title, year, id_index):
+    """Find the exact movie/show a saved channel entry means — without guessing.
+
+    `kind` is "movie" or "show"; `ids` is the entry's saved numbers ({'tmdb': ..,
+    'plex': .., 'tunarr': ..}). Numbers are tried in priority order (TMDB, Plex, Tunarr).
+    If the first one stopped matching (a re-match changed it) but a spare still finds
+    the item, that's a heal: the caller gets the item's current numbers to re-save.
+    As a last resort the saved title + year may name exactly one item of that kind.
+
+    Returns (item, status, current_ids):
+      "ok"        the first saved number matched
+      "healed"    a spare number, or title + year, matched — re-save current_ids
+      "ambiguous" title + year fit more than one different item — ask the person
+      "missing"   nothing matched
+    """
+    by_id = id_index["by_id"].get(kind, {})
+    tried = [s for s in _ID_PRIORITY if ids.get(s)]
+    for n, source in enumerate(tried):
+        item = by_id.get((source, str(ids[source])))
+        if item is not None:
+            return item, ("ok" if n == 0 else "healed"), item["ids"]
+
+    if title:
+        want = title.lower().strip()
+        hits = [it for it in id_index["all"].get(kind, [])
+                if it["title"].lower().strip() == want and (year is None or it.get("year") == year)]
+        # Two library copies of the same movie share a TMDB number: still one item.
+        identities = {it["ids"].get("tmdb") or it["ids"].get("tunarr") or id(it) for it in hits}
+        if len(identities) == 1:
+            best = _best_copy(hits)
+            return best, "healed", best["ids"]
+        if len(identities) > 1:
+            return None, "ambiguous", None
+    return None, "missing", None
 
 
 # ── Title resolution ───────────────────────────────────────────────────────────
@@ -501,13 +760,26 @@ def get_plex_sections(plex_url, token):
     return data["MediaContainer"].get("Directory", [])
 
 
-def resolve_collection(plex_url, token, name, sections, cache):
-    """Return a list of titles from a named Plex collection (cached)."""
+_PLEX_KIND = {"movie": "movie", "show": "show"}
+
+
+class _Resolved(dict):
+    """An item resolve_content has already matched (a saved entry that carries ids),
+    waiting in the ordered list so it keeps its place among the other entries."""
+
+
+def resolve_collection_members(plex_url, token, name, sections, cache):
+    """The members of a named Plex collection (cached), as dicts:
+    {"title", "kind" ("movie" / "show" / None for anything else), "plex_id", "year"}.
+
+    Plex already says what each member IS and gives its own id in this same answer —
+    a title alone loses both, and then a movie and a same-named show can't be told apart.
+    """
     key = name.lower().strip()
     if key in cache:
         return cache[key]
 
-    titles = []
+    members = []
     for section in sections:
         section_key = section.get("key")
         data = plex_get(plex_url, token, f"/library/sections/{section_key}/collections")
@@ -527,28 +799,65 @@ def resolve_collection(plex_url, token, name, sections, cache):
                 items_data = plex_get(plex_url, token, children_path)
                 if items_data:
                     items = items_data["MediaContainer"].get("Metadata", [])
-                    titles = [item["title"] for item in items if item.get("title")]
-                    if titles:
+                    members = [
+                        {"title": item["title"],
+                         "kind": _PLEX_KIND.get(item.get("type")),
+                         "plex_id": str(item["ratingKey"]) if item.get("ratingKey") is not None else None,
+                         "year": item.get("year")}
+                        for item in items if item.get("title")
+                    ]
+                    if members:
                         break
             break
 
-    cache[key] = titles
-    return titles
+    cache[key] = members
+    return members
+
+
+def resolve_collection(plex_url, token, name, sections, cache):
+    """Return a list of titles from a named Plex collection (cached)."""
+    return [m["title"] for m in resolve_collection_members(plex_url, token, name, sections, cache)]
+
+
+def _resolve_collection_member(member, movie_map, show_map, id_index):
+    """Find the library item for one Plex collection member — by Plex's own id when we
+    have the id index, never by a bare title that could also be a different thing.
+
+    1. Plex's id (and whether it's a movie or a show) → the exact item.
+    2. Tunarr hasn't caught up (Plex gave it a new id, say): the title + year, but only
+       if that names exactly one item of that kind.
+    Without the id index (older callers) it still uses the movie/show label, which is
+    enough to stop a movie and a same-named show being mixed up."""
+    kind = member.get("kind")
+    if id_index is None or kind is None:
+        return resolve_title(member["title"], movie_map, show_map, kind=kind)
+    if member.get("plex_id"):
+        item = find_by_plex_id(kind, member["plex_id"], id_index)
+        if item is not None:
+            return item
+    item, _status, _ids = resolve_by_ids(kind, {}, member["title"], member.get("year"), id_index)
+    return item
 
 
 # ── Content resolution ─────────────────────────────────────────────────────────
 
 def resolve_content(content_list, movie_map, show_map,
                     plex_url=None, plex_token=None, plex_sections=None, collection_cache=None,
-                    franchise_index=None):
+                    franchise_index=None, id_index=None, report=None):
     """Resolve a channel's content list into (resolved_items, missing).
 
     Each entry is one of:
     - A plain title string — matched against the Tunarr library index by exact title.
     - A {"movie": "Title"} or {"show": "Title"} ref — exact title, restricted to that
       media type (disambiguates a movie and a show that share a title).
-    - A {"collection": "Name"} ref — expanded to member titles via Plex, then each
-      title is matched against the library index.
+    - The same ref with saved numbers — {"movie": "Aladdin", "year": 2019, "ids":
+      {"tmdb": .., "plex": .., "tunarr": ..}} — finds that exact item by its numbers
+      through `id_index` (see resolve_by_ids), so two things sharing a title can't be
+      mixed up. A stale number heals from a spare; if nothing fits it is reported as
+      missing and never guessed. Without `id_index` the title and type are used.
+    - A {"collection": "Name"} ref — expanded to its members via Plex. Each member is
+      matched by Plex's own id (and movie/show label) through `id_index`, not by title,
+      so a collection's "Wonder Woman" the movie can't turn into the show.
     - A {"match": "title_contains", "value": "..."} ref — word-boundary scan of the
       Tunarr library; order/exclude supported.
     - A {"match": "franchise", "name": "..."} ref — identity-based resolution via the
@@ -558,6 +867,16 @@ def resolve_content(content_list, movie_map, show_map,
 
     Returns (resolved_items, missing): resolved_items are ready for build_schedule;
     missing is a list of titles/ref labels that could not be found.
+
+    Pass a dict as `report` to also learn WHY, so a screen can tell the person instead of
+    the item vanishing silently. It is filled with:
+      report["missing"] = [{"label": .., "why": ..}]   — what was skipped, and the reason
+      report["ambiguous"] = [{"label", "kind", "current", "options"}]
+    a plain title that names more than one movie/show, with each option's ready-to-save
+    entry and which one plays now (needs `id_index`),
+      report["healed"]  = [{"entry", "kind", "title", "year", "ids"}]
+    a saved entry whose main number went stale but was found again through a spare
+    (`entry` is the entry as saved, `ids`/`year`/`title` are the item's current ones).
     """
     plex_sections = plex_sections or []
     collection_cache = collection_cache if collection_cache is not None else {}
@@ -566,19 +885,57 @@ def resolve_content(content_list, movie_map, show_map,
     expanded_titles = []
     matched_items = []
     missing = []
+
+    def _miss(label, why):
+        missing.append(label)
+        if report is not None:
+            report.setdefault("missing", []).append({"label": label, "why": why})
+
+    flagged = set()
+
+    def _flag_ambiguous(title, kind):
+        """A plain title (or a typed one without numbers) that names more than one thing
+        is played as ONE of them, chosen arbitrarily — so say so, and let the person pick."""
+        if report is None or id_index is None:
+            return
+        key = (title.lower().strip(), kind)
+        if key in flagged:
+            return
+        flagged.add(key)
+        found = _find_ambiguity(title, kind, movie_map, show_map, id_index)
+        if found:
+            report.setdefault("ambiguous", []).append(found)
+
     for entry in content_list:
         if isinstance(entry, dict) and ("movie" in entry or "show" in entry):
             kind = "movie" if "movie" in entry else "show"
-            expanded_titles.append((entry[kind], kind))  # resolved in order below
+            if entry.get("ids") and id_index is not None:
+                item, status, _ids = resolve_by_ids(kind, entry["ids"], entry[kind], entry.get("year"), id_index)
+                if item is not None:
+                    expanded_titles.append(_Resolved(item))  # keeps its place in the order
+                    if status == "healed":
+                        print(f"    Note: '{entry[kind]}' was found again through a backup number")
+                        if report is not None:
+                            report.setdefault("healed", []).append({
+                                "entry": dict(entry), "kind": kind, "title": item["title"],
+                                "year": item.get("year"), "ids": dict(item["ids"])})
+                else:
+                    why = "matches more than one item" if status == "ambiguous" else "was not found"
+                    print(f"    WARNING: '{entry[kind]}' {why} (by its saved numbers, or by title + year)")
+                    _miss(entry[kind], "matches more than one item — open the channel and pick which"
+                          if status == "ambiguous" else "not found in your library")
+            else:
+                _flag_ambiguous(entry[kind], kind)
+                expanded_titles.append((entry[kind], kind))  # resolved in order below
         elif isinstance(entry, dict) and "collection" in entry:
             col_name = entry["collection"]
-            col_titles = resolve_collection(plex_url, plex_token, col_name, plex_sections, collection_cache)
-            if col_titles:
-                expanded_titles.extend(col_titles)
-                print(f"    Collection '{col_name}': {len(col_titles)} titles")
+            col_members = resolve_collection_members(plex_url, plex_token, col_name, plex_sections, collection_cache)
+            if col_members:
+                expanded_titles.extend(col_members)  # dicts: matched by Plex id below
+                print(f"    Collection '{col_name}': {len(col_members)} titles")
             else:
                 print(f"    WARNING: Collection '{col_name}' not found in Plex")
-                missing.append(f"[collection:{col_name}]")
+                _miss(f"[collection:{col_name}]", "collection not found in Plex")
         elif isinstance(entry, dict) and "match" in entry:
             if entry["match"] == "franchise" and entry.get("name"):
                 fr_name = entry["name"]
@@ -589,7 +946,7 @@ def resolve_content(content_list, movie_map, show_map,
                     print(f"    Franchise '{fr_name}': {len(items)} titles")
                 else:
                     print(f"    WARNING: franchise '{fr_name}' matched nothing (cache missing or no library members)")
-                    missing.append(f"[franchise:{fr_name}]")
+                    _miss(f"[franchise:{fr_name}]", "franchise matched nothing in your library")
             elif entry["match"] == "title_contains" and entry.get("value"):
                 value = entry["value"]
                 items, _ = match_titles(value, movie_map, show_map,
@@ -599,22 +956,31 @@ def resolve_content(content_list, movie_map, show_map,
                     print(f"    Match '{value}': {len(items)} titles")
                 else:
                     print(f"    WARNING: match '{value}' matched nothing in library")
-                    missing.append(f"[match:{value}]")
+                    _miss(f"[match:{value}]", "matched nothing in your library")
             else:
                 value = entry.get("value", "")
                 print(f"    WARNING: unsupported match ref: {entry}")
-                missing.append(f"[match:{value or entry.get('match')}]")
+                _miss(f"[match:{value or entry.get('match')}]", "unsupported reference")
         else:
+            if isinstance(entry, str):
+                _flag_ambiguous(entry, None)
             expanded_titles.append(entry)
 
     resolved = []
     for entry in expanded_titles:
-        title, kind = entry if isinstance(entry, tuple) else (entry, None)
-        item = resolve_title(title, movie_map, show_map, kind=kind)
+        if isinstance(entry, _Resolved):
+            resolved.append(dict(entry))
+            continue
+        if isinstance(entry, dict):  # a Plex collection member
+            title = entry["title"]
+            item = _resolve_collection_member(entry, movie_map, show_map, id_index)
+        else:
+            title, kind = entry if isinstance(entry, tuple) else (entry, None)
+            item = resolve_title(title, movie_map, show_map, kind=kind)
         if item:
             resolved.append(item)
         else:
-            missing.append(title)
+            _miss(title, "not found in your library")
 
     resolved.extend(matched_items)
     return resolved, missing

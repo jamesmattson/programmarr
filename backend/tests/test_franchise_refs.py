@@ -181,8 +181,8 @@ def test_scheduler_cycle_resolves_franchise_refs(tmp_path, monkeypatch):
 
     monkeypatch.setattr(scheduler, "DATA_DIR", tmp_path)
     monkeypatch.setattr(scheduler, "LOGS_DIR", tmp_path / "logs")
-    monkeypatch.setattr(channel_engine, "build_library_index",
-                        lambda url: (movie_map, show_map))
+    monkeypatch.setattr(channel_engine, "build_library_index_with_ids",
+                        lambda url: (movie_map, show_map, None))
     monkeypatch.setattr(channel_engine, "find_channel_by_number",
                         lambda url, n: {"id": "tid-7", "number": n, "name": "Die Hard 24/7"})
     # Current programming is empty → the fresh ids must register as a change.

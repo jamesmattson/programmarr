@@ -10,7 +10,7 @@ import {
 } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { api, Channel, ChannelSyncState, ContentItem, FillerList, FranchiseRef, isMatchRef, RecipeMatch, TunarrChannel } from '../api/client';
+import { AmbiguousChoice, api, Channel, ChannelNotice, ChannelReview, ChannelSyncState, ContentItem, FillerList, FranchiseRef, isMatchRef, LibraryMatch, RecipeMatch, TunarrChannel } from '../api/client';
 
 function syncedAgo(iso?: string): string {
   if (!iso) return 'never';
@@ -19,6 +19,26 @@ function syncedAgo(iso?: string): string {
   if (secs < 3600) return `${Math.round(secs / 60)}m ago`;
   if (secs < 86400) return `${Math.round(secs / 3600)}h ago`;
   return `${Math.round(secs / 86400)}d ago`;
+}
+
+// What a channel's last update skipped or found again — shown on its row and in its editor,
+// so an item that stops matching is never silently dropped.
+function noticeText(n: Pick<ChannelReview, 'missing_count' | 'healed_count'>): string {
+  const parts: string[] = [];
+  if (n.missing_count) {
+    parts.push(`${n.missing_count} item${n.missing_count === 1 ? '' : 's'} couldn't be found and ${n.missing_count === 1 ? 'was' : 'were'} skipped`);
+  }
+  if (n.healed_count) {
+    parts.push(`${n.healed_count} ${n.healed_count === 1 ? 'was' : 'were'} found again through a backup number`);
+  }
+  return parts.join('; ');
+}
+
+// "1991" / "2017" — or "movie 2017" / "show 1975" when the choice mixes movies and shows.
+function optionLabel(a: AmbiguousChoice, o: AmbiguousChoice['options'][number]): string {
+  const mixed = new Set(a.options.map((x) => x.kind)).size > 1;
+  const year = o.year ? String(o.year) : o.title;
+  return mixed ? `${o.kind} ${year}` : year;
 }
 
 const SHUFFLE_COLOR: Record<string, string> = { ordered: 'blue', block: 'violet', shuffle: 'teal' };
@@ -161,6 +181,23 @@ function FranchiseBuilder({
 
 // ── Channel editor modal ───────────────────────────────────────────────────────
 
+// One row per saved entry. `raw` is the exact saved entry for anything that carries more
+// than its text (a pinned item's ids, a collection), so editing and saving can never erase
+// it. Rows typed into the box have no raw and are parsed on save, as before.
+type ContentRow = { label: string; raw: ContentItem | null };
+
+function rowFromEntry(c: ContentItem): ContentRow {
+  if (typeof c === 'string') return { label: c, raw: null };
+  const o = c as unknown as Record<string, unknown>;
+  const [k, v] = Object.entries(o)[0];
+  const shownYear = o.ids && o.year ? ` (${o.year})` : '';
+  return { label: `{${k}: ${v}${shownYear}}`, raw: c };
+}
+
+function isPinned(row: ContentRow): boolean {
+  return row.raw !== null && typeof row.raw === 'object' && 'ids' in row.raw;
+}
+
 function ChannelModal({
   channel,
   opened,
@@ -175,8 +212,12 @@ function ChannelModal({
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
   const [shuffle, setShuffle] = useState<string>('shuffle');
-  const [content, setContent] = useState<string[]>([]);
+  const [content, setContent] = useState<ContentRow[]>([]);
   const [newItem, setNewItem] = useState('');
+  const [looking, setLooking] = useState(false);
+  // A live check of this channel against the library, fetched when the editor opens.
+  const [review, setReview] = useState<ChannelReview | null>(null);
+  const [choices, setChoices] = useState<{ text: string; matches: LibraryMatch[] } | null>(null);
   const [live, setLive] = useState(false);
   const [matchRef, setMatchRef] = useState<MatchRule | null>(null);
   const [franchiseRefs, setFranchiseRefs] = useState<FranchiseRef[]>([]);
@@ -224,21 +265,76 @@ function ChannelModal({
     const mref = channel.content.find(isMatchRef);
     setMatchRef(mref ? { value: mref.value, order: mref.order || 'release_date', exclude: mref.exclude || [] } : null);
     setFranchiseRefs(channel.content.filter(isFranchiseRef));
+    setChoices(null);
     setContent(
       channel.content
         .filter((c) => !isMatchRef(c) && !isFranchiseRef(c))
-        .map((c) => {
-          if (typeof c === 'string') return c;
-          const [k, v] = Object.entries(c as Record<string, string>)[0];
-          return `{${k}: ${v}}`;
-        })
+        .map(rowFromEntry)
     );
   }, [channel]);
 
-  function addItem() {
-    if (!newItem.trim()) return;
-    setContent((c) => [...c, newItem.trim()]);
+  useEffect(() => {
+    setReview(null);
+    if (!channel || !opened) return;
+    let alive = true;
+    api.getChannelReview(channel.number).then((r) => { if (alive) setReview(r); }).catch(() => {});
+    return () => { alive = false; };
+  }, [channel, opened]);
+
+  // Swap a plain title for the exact item(s) the person picked. Nothing is saved until
+  // Save and Apply, like every other edit here.
+  function choose(a: AmbiguousChoice, options: AmbiguousChoice['options']) {
+    const want = a.label.toLowerCase().trim();
+    const isTarget = (row: ContentRow) => {
+      if (row.raw === null) return row.label.toLowerCase().trim() === want;
+      const o = row.raw as unknown as Record<string, unknown>;
+      const title = o.movie ?? o.show;
+      return typeof title === 'string' && !o.ids && title.toLowerCase().trim() === want;
+    };
+    setContent((rows) => {
+      const out: ContentRow[] = [];
+      let placed = false;
+      for (const r of rows) {
+        if (!isTarget(r)) { out.push(r); continue; }
+        if (!placed) { options.forEach((o) => out.push(rowFromEntry(o.entry))); placed = true; }
+      }
+      return out;
+    });
+    setReview((r) => (r ? {
+      ...r, ambiguous: r.ambiguous.filter((x) => x !== a), ambiguous_count: Math.max(0, r.ambiguous_count - 1),
+    } : r));
+  }
+
+  function pushRow(row: ContentRow) {
+    setContent((c) => [...c, row]);
     setNewItem('');
+    setChoices(null);
+  }
+
+  // Look the title up in the library first, so what gets saved is the exact item:
+  //   one match  -> saved with the item's own numbers;
+  //   several    -> ask which one (the two Aladdins);
+  //   none       -> added as typed, exactly like before.
+  async function addItem() {
+    const text = newItem.trim();
+    if (!text || looking) return;
+    const typed = text.match(/^\{(collection|movie|show):\s*(.+)\}$/);
+    // A collection stays a live reference — never frozen into whatever it holds today.
+    if (typed && typed[1] === 'collection') return pushRow({ label: text, raw: null });
+    const kind = typed ? (typed[1] as 'movie' | 'show') : undefined;
+    const title = typed ? typed[2].trim() : text;
+    setLooking(true);
+    try {
+      const { matches } = await api.lookupLibrary(title, kind);
+      if (matches.length === 1) return pushRow(rowFromEntry(matches[0].entry));
+      if (matches.length > 1) return setChoices({ text, matches });
+      notifications.show({ color: 'yellow', message: `"${title}" isn't in your Tunarr library — added as typed.` });
+    } catch {
+      // Tunarr unreachable or not configured: keep the old behaviour instead of blocking the add.
+    } finally {
+      setLooking(false);
+    }
+    pushRow({ label: text, raw: null });
   }
 
   function removeItem(i: number) {
@@ -246,9 +342,10 @@ function ChannelModal({
   }
 
   async function persist() {
-    const rawContent: ContentItem[] = content.map((c) => {
-      const m = c.match(/^\{(collection|movie|show):\s*(.+)\}$/);
-      return m ? ({ [m[1]]: m[2].trim() } as ContentItem) : c;
+    const rawContent: ContentItem[] = content.map((r) => {
+      if (r.raw) return r.raw;
+      const m = r.label.match(/^\{(collection|movie|show):\s*(.+)\}$/);
+      return m ? ({ [m[1]]: m[2].trim() } as ContentItem) : r.label;
     });
     if (matchRef) {
       rawContent.push({
@@ -283,8 +380,26 @@ function ChannelModal({
     setSaving(true);
     try {
       await persist();
-      await api.applyChannel(channel.number);
-      notifications.show({ message: `Channel #${channel.number} saved and applied`, color: 'green', icon: <IconCheck size={14} /> });
+      const { notice: n } = await api.applyChannel(channel.number);
+      if (n && n.missing_count > 0) {
+        notifications.show({
+          color: 'yellow', autoClose: 15000,
+          title: `Channel #${channel.number} applied — ${n.missing_count} item${n.missing_count === 1 ? '' : 's'} skipped`,
+          message: n.missing.slice(0, 5).map((m) => `${m.label} (${m.why})`).join('; ')
+            + (n.missing_count > 5 ? `; …and ${n.missing_count - 5} more` : ''),
+        });
+      } else {
+        notifications.show({
+          message: `Channel #${channel.number} saved and applied` + (n?.healed_count ? ` (${noticeText(n)})` : ''),
+          color: 'green', icon: <IconCheck size={14} />,
+        });
+      }
+      if (n?.ambiguous_count) {
+        notifications.show({
+          color: 'blue', autoClose: 10000,
+          message: `${n.ambiguous_count} title${n.ambiguous_count === 1 ? '' : 's'} in channel #${channel.number} still match more than one item — open it to choose which.`,
+        });
+      }
       onSaved();
       onClose();
     } catch (e: any) {
@@ -344,11 +459,58 @@ function ChannelModal({
 
         <Divider label="Content" labelPosition="left" />
 
+        {review && (review.missing_count > 0 || review.healed_count > 0) && (
+          <Card withBorder p="xs" style={{ background: 'var(--surface-panel)' }}>
+            <Text size="xs" fw={600} c="yellow" mb={4}>⚠ Right now: {noticeText(review)}.</Text>
+            {review.missing.map((m, i) => (
+              <Text key={i} size="xs" style={{ fontFamily: 'ui-monospace, monospace' }}>
+                {m.label} <Text span c="dimmed">— {m.why}</Text>
+              </Text>
+            ))}
+            {review.missing_count > review.missing.length && (
+              <Text size="xs" c="dimmed">…and {review.missing_count - review.missing.length} more</Text>
+            )}
+            {review.missing.length > 0 && (
+              <Text size="xs" c="dimmed" mt={4}>
+                To fix one: remove it below (✕) and add it again — the Add box offers the right match.
+              </Text>
+            )}
+          </Card>
+        )}
+
+        {review && review.ambiguous.length > 0 && (
+          <Card withBorder p="xs" style={{ background: 'var(--surface-panel)' }}>
+            <Text size="xs" fw={600} c="orange" mb={4}>
+              {review.ambiguous_count} title{review.ambiguous_count === 1 ? '' : 's'} match more than one item — pick which to play:
+            </Text>
+            <Stack gap={6} style={{ maxHeight: 280, overflowY: 'auto' }}>
+              {review.ambiguous.map((a) => (
+                <Group key={`${a.label}|${a.kind ?? ''}`} gap={6}>
+                  <Text size="xs" style={{ fontFamily: 'ui-monospace, monospace' }}>{a.label}</Text>
+                  {a.options.map((o, i) => (
+                    <Button key={i} size="compact-xs" variant="light" color="orange" onClick={() => choose(a, [o])}>
+                      {optionLabel(a, o)}
+                    </Button>
+                  ))}
+                  <Button size="compact-xs" variant="subtle" color="gray" onClick={() => choose(a, a.options)}>
+                    Both
+                  </Button>
+                  {a.current !== null && a.options[a.current] && (
+                    <Text size="xs" c="dimmed">plays now: {optionLabel(a, a.options[a.current])}</Text>
+                  )}
+                </Group>
+              ))}
+            </Stack>
+            <Text size="xs" c="dimmed" mt={4}>Your choices take effect after Save and Apply.</Text>
+          </Card>
+        )}
+
         <Stack gap={4}>
-          {content.map((item, i) => (
+          {content.map((row, i) => (
             <Group key={i} gap="xs" wrap="nowrap">
               <Text size="sm" style={{ flex: 1, fontFamily: 'ui-monospace, monospace' }} truncate>
-                {item}
+                {row.label}
+                {isPinned(row) && <Text span c="dimmed" size="xs"> · pinned</Text>}
               </Text>
               <ActionIcon size="sm" color="red" variant="subtle" onClick={() => removeItem(i)}>
                 <IconX size={14} />
@@ -374,10 +536,30 @@ function ChannelModal({
             style={{ flex: 1 }}
             size="sm"
           />
-          <Button size="sm" variant="light" color="orange" onClick={addItem} leftSection={<IconPlus size={14} />}>
+          <Button size="sm" variant="light" color="orange" onClick={addItem} loading={looking}
+            leftSection={<IconPlus size={14} />}>
             Add
           </Button>
         </Group>
+
+        {choices && (
+          <Card withBorder p="xs" style={{ background: 'var(--surface-panel)' }}>
+            <Text size="xs" fw={600} mb={4}>
+              "{choices.text}" matches {choices.matches.length} items in your library — which one?
+            </Text>
+            <Stack gap={4}>
+              {choices.matches.map((m, i) => (
+                <Button key={i} size="compact-sm" variant="light" color="orange" justify="flex-start"
+                  onClick={() => pushRow(rowFromEntry(m.entry))}>
+                  {m.title}{m.year ? ` (${m.year})` : ''} — {m.kind}
+                </Button>
+              ))}
+              <Button size="compact-xs" variant="subtle" color="gray" onClick={() => setChoices(null)}>
+                Cancel
+              </Button>
+            </Stack>
+          </Card>
+        )}
 
         <Divider label="Live recipe" labelPosition="left" />
 
@@ -546,11 +728,13 @@ function ChannelModal({
 function ChannelRow({
   channel,
   sync,
+  notice,
   onEdit,
   onDelete,
 }: {
   channel: TunarrChannel;
   sync?: ChannelSyncState;
+  notice?: ChannelNotice | ChannelReview;
   onEdit: () => void;
   onDelete: () => void;
 }) {
@@ -590,6 +774,41 @@ function ChannelRow({
               </Badge>
               <Text size="xs" c="dimmed">synced {syncedAgo(sync.checked_at)}</Text>
             </Group>
+          )}
+          {notice && (notice.ambiguous_count ?? 0) > 0 && (
+            <Tooltip
+              multiline w={340}
+              label={
+                <Stack gap={2}>
+                  <Text size="xs">Match more than one item — open the channel to choose:</Text>
+                  {(notice.ambiguous ?? []).slice(0, 8).map((a, i) => (
+                    <Text key={i} size="xs">{a.label}</Text>
+                  ))}
+                  {(notice.ambiguous_count ?? 0) > 8 && <Text size="xs">…and {(notice.ambiguous_count ?? 0) - 8} more</Text>}
+                </Stack>
+              }
+            >
+              <Badge size="xs" color="blue" variant="light" mt={2} mr={4} style={{ cursor: 'default' }}>
+                {notice.ambiguous_count} to review
+              </Badge>
+            </Tooltip>
+          )}
+          {notice && notice.missing_count > 0 && (
+            <Tooltip
+              multiline w={340}
+              label={
+                <Stack gap={2}>
+                  {notice.missing.slice(0, 8).map((m, i) => (
+                    <Text key={i} size="xs">{m.label} — {m.why}</Text>
+                  ))}
+                  {notice.missing_count > 8 && <Text size="xs">…and {notice.missing_count - 8} more</Text>}
+                </Stack>
+              }
+            >
+              <Badge size="xs" color="yellow" variant="light" mt={2} style={{ cursor: 'default' }}>
+                ⚠ {notice.missing_count} skipped
+              </Badge>
+            </Tooltip>
           )}
         </Box>
 
@@ -641,6 +860,10 @@ export default function Channels() {
   const [channels, setChannels] = useState<TunarrChannel[]>([]);
   const [managed, setManaged] = useState<Set<number>>(new Set());
   const [sync, setSync] = useState<Record<string, ChannelSyncState>>({});
+  const [notices, setNotices] = useState<Record<string, ChannelNotice>>({});
+  // A live check of every channel: what the saved notices know is only what the last Apply or
+  // auto-update saw, so a channel nobody has applied since would otherwise show nothing here.
+  const [reviews, setReviews] = useState<Record<string, ChannelReview>>({});
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Channel | null>(null);
   const [opened, { open, close }] = useDisclosure(false);
@@ -654,6 +877,8 @@ export default function Channels() {
     setManaged(new Set(local.channels.map((c) => c.number)));
     setLoading(false);
     api.getRecipesStatus().then((s) => setSync(s.channels || {})).catch(() => {});
+    api.getChannelNotices().then(setNotices).catch(() => {});
+    api.getChannelReviews().then(setReviews).catch(() => {});
   }
 
   useEffect(() => { load(); }, []);
@@ -721,6 +946,7 @@ export default function Channels() {
                 key={ch.number}
                 channel={ch}
                 sync={sync[String(ch.number)]}
+                notice={reviews[String(ch.number)] ?? notices[String(ch.number)]}
                 onEdit={() => edit(ch)}
                 onDelete={() => load()}
               />
