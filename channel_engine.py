@@ -243,20 +243,113 @@ def _no_plex_source_error(tunarr_url):
     )
 
 
-def build_library_index(tunarr_url):
+# ── Library index ──────────────────────────────────────────────────────────────
+#
+# Two views of the same scan:
+#   - movie_map / show_map: keyed by TITLE (what a person types). One entry per title,
+#     so two things sharing a title collapse into one — fine for typing, useless for
+#     telling The Office US from UK, or the two Aladdins, apart.
+#   - id_index: keyed by each item's own unique numbers. Nothing collapses, because
+#     no two different movies/shows share a number. This is what saved channels use.
+#
+# An item's numbers ("ids"): TMDB (the outside movie/TV database — survives a rename
+# or a Plex re-add), Plex's own id, and Tunarr's own id. Items no public database
+# knows about (home recordings, say) have only the last two, which is why both are kept.
+
+_ID_PRIORITY = ("tmdb", "plex", "tunarr")
+
+
+def _identifier_map(obj):
+    """{'tmdb': '2316', 'plex': '110865', ...} from a Tunarr item's `identifiers` list.
+    A Tunarr that doesn't send the list (older versions) just yields {}."""
+    out = {}
+    for ident in (obj or {}).get("identifiers") or []:
+        kind, value = ident.get("type"), ident.get("id")
+        if kind and value and kind not in out:
+            out[kind] = str(value)
+    return out
+
+
+def _ids_for(obj, tunarr_id):
+    ids = _identifier_map(obj)
+    if ids.get("plex"):
+        # Plex ids are only unique per Plex server; two servers can reuse a number.
+        ids["plex"] = f"{obj.get('mediaSourceId', '')}:{ids['plex']}"
+    if tunarr_id:
+        ids["tunarr"] = str(tunarr_id)
+    # Keep only the numbers we actually look things up by, so what gets saved into a
+    # channel stays small.
+    return {s: ids[s] for s in _ID_PRIORITY if s in ids}
+
+
+def _movie_item(p):
+    prog = p.get("program", {})
+    return {"type": "Movie", "title": prog.get("title", ""), "programs": [p],
+            "ids": _ids_for(prog, p.get("id") or prog.get("uuid")), "year": prog.get("year")}
+
+
+def _show_item(show, show_id):
+    return {"type": "TV", "title": show.get("title", ""), "showId": show_id, "programs": [],
+            "ids": _ids_for(show, show_id), "year": show.get("year")}
+
+
+def _best_copy(items):
+    """Several library copies of the SAME thing (an HD and a 4K library, say): keep the
+    one with the most playable programs, so a dead copy never shadows the real one."""
+    return max(items, key=lambda it: _playable_count(it["programs"]))
+
+
+def _build_id_index(movie_items, show_items):
+    kinds = {"movie": movie_items, "show": show_items}
+    by_id = {"movie": {}, "show": {}}
+    for kind, items in kinds.items():
+        for item in items:
+            for source in _ID_PRIORITY:
+                value = item["ids"].get(source)
+                if value:
+                    by_id[kind].setdefault((source, value), []).append(item)
+        for key, items_for_key in by_id[kind].items():
+            by_id[kind][key] = _best_copy(items_for_key)
+    return {"by_id": by_id, "all": kinds}
+
+
+def _scan_tunarr_library(tunarr_url):
+    """One pass over every enabled Plex-backed movie and TV library Tunarr has. Builds
+    both the by-title maps and the raw items the id index is made from, so a library is
+    fetched once."""
     plex_sources = get_plex_sources(tunarr_url)
     if not plex_sources:
         raise _no_plex_source_error(tunarr_url)
 
     movie_map = {}
+    movie_items = []      # every movie, one entry each — never merged by title
     # title-key -> {title, by_lib: {lib_id: {showId, programs}}}
     # Collected across ALL Plex sources before picking the best copy per show.
     tv_candidates = {}
+    shows_by_uuid = {}    # every distinct show by its own Tunarr id — never merged by title
     # api() reports every failure as None, and treating that as "no programs"
     # turns an outage into a silent empty index — which downstream looks like a
     # library with no content and would deploy channels with nothing on them.
     failed_libs = []
     attempted_libs = 0
+
+    def _fetch(lib, source_name):
+        nonlocal attempted_libs
+        programs = get_library_programs(tunarr_url, lib["id"])
+        if programs is None:
+            failed_libs.append(f"{source_name}/{lib.get('name', lib['id'])}")
+            return None
+        attempted_libs += 1
+        return programs
+
+    def _index_movies(programs):
+        for p in programs:
+            title = p.get("program", {}).get("title", "")
+            if title:
+                key = title.lower().strip()
+                if key not in movie_map:
+                    movie_map[key] = p
+            movie_items.append(_movie_item(p))
 
     for source in plex_sources:
         source_name = source.get("name", "Plex")
@@ -270,26 +363,16 @@ def build_library_index(tunarr_url):
         if movie_libs:
             print(f"  Indexing movies ({source_name})...")
             for lib in movie_libs:
-                programs = get_library_programs(tunarr_url, lib["id"])
-                if programs is None:
-                    failed_libs.append(f"{source_name}/{lib.get('name', lib['id'])}")
-                    continue
-                attempted_libs += 1
-                for p in programs:
-                    title = p.get("program", {}).get("title", "")
-                    if title:
-                        key = title.lower().strip()
-                        if key not in movie_map:
-                            movie_map[key] = p
+                programs = _fetch(lib, source_name)
+                if programs is not None:
+                    _index_movies(programs)
 
         if tv_libs:
             print(f"  Indexing TV shows ({source_name})...")
             for lib in tv_libs:
-                programs = get_library_programs(tunarr_url, lib["id"])
+                programs = _fetch(lib, source_name)
                 if programs is None:
-                    failed_libs.append(f"{source_name}/{lib.get('name', lib['id'])}")
                     continue
-                attempted_libs += 1
                 for p in programs:
                     prog = p.get("program", {})
                     show = prog.get("show", {})
@@ -302,6 +385,15 @@ def build_library_index(tunarr_url):
                     entry = c["by_lib"].setdefault(lib["id"], {"showId": show_id, "programs": []})
                     entry["programs"].append(p)
 
+                    item = shows_by_uuid.get(show_id)
+                    if item is None:
+                        item = shows_by_uuid[show_id] = _show_item(show, show_id)
+                    item["programs"].append(p)
+
+    return movie_map, movie_items, tv_candidates, list(shows_by_uuid.values()), failed_libs, attempted_libs
+
+
+def _check_failed_libs(failed_libs, attempted_libs):
     if failed_libs and attempted_libs == 0:
         raise ChannelEngineError(
             "Could not read any library from Tunarr (" + ", ".join(failed_libs) + "). "
@@ -315,20 +407,94 @@ def build_library_index(tunarr_url):
               + ", ".join(failed_libs))
         print("  ! Channels built now may be missing content from those libraries.")
 
-    print(f"  Indexed {len(movie_map)} movies")
 
-    # For each show pick the single copy (across all sources/libraries) with the most
-    # PLAYABLE episodes, so a dead duplicate never shadows the real one or inflates the
-    # live-channel diff into churn.
+def _collapse_show_map(tv_candidates):
+    """For each show TITLE pick the single copy (across all sources/libraries) with the
+    most PLAYABLE episodes, so a dead duplicate never shadows the real one or inflates
+    the live-channel diff into churn. Two different shows sharing a title collapse into
+    one here — use the id index (library_id_index) when that matters."""
     show_map = {}
     def _playable(entry):
         return sum(1 for p in entry["programs"] if p.get("program", {}).get("state") != "missing")
     for key, c in tv_candidates.items():
         best = max(c["by_lib"].values(), key=_playable)
         show_map[key] = {"title": c["title"], "showId": best["showId"], "programs": best["programs"]}
-    print(f"  Indexed {len(show_map)} TV shows")
+    return show_map
 
-    return movie_map, show_map
+
+class LibraryIndex(tuple):
+    """(movie_map, show_map) — exactly what build_library_index has always returned, so
+    `movie_map, show_map = build_library_index(url)` keeps working everywhere — with the
+    id index from the same scan riding along as `.id_index`. Read it through
+    library_id_index(), which also copes with a plain 2-tuple (None = title-only)."""
+
+    def __new__(cls, movie_map, show_map, id_index=None):
+        obj = super().__new__(cls, (movie_map, show_map))
+        obj.id_index = id_index
+        return obj
+
+    def __reduce__(self):
+        # tuple's default reduce calls __new__ with only the tuple, which lacks show_map —
+        # so pickle, copy.copy and deepcopy all failed. Rebuild from all three parts.
+        return (type(self), (self[0], self[1], self.id_index))
+
+
+def library_id_index(library_index):
+    """The id index carried by a build_library_index result, or None when there isn't
+    one (a plain (movie_map, show_map) tuple) — None means title-only matching."""
+    return getattr(library_index, "id_index", None)
+
+
+def build_library_index(tunarr_url):
+    movie_map, movie_items, tv_candidates, show_items, failed_libs, attempted_libs = \
+        _scan_tunarr_library(tunarr_url)
+    _check_failed_libs(failed_libs, attempted_libs)
+    print(f"  Indexed {len(movie_map)} movies")
+    show_map = _collapse_show_map(tv_candidates)
+    print(f"  Indexed {len(show_map)} TV shows")
+    return LibraryIndex(movie_map, show_map, _build_id_index(movie_items, show_items))
+
+
+def build_library_index_with_ids(tunarr_url):
+    """build_library_index unpacked as (movie_map, show_map, id_index)."""
+    index = build_library_index(tunarr_url)
+    return index[0], index[1], library_id_index(index)
+
+
+def resolve_by_ids(kind, ids, title, year, id_index):
+    """Find the exact movie/show a saved channel entry means — without guessing.
+
+    `kind` is "movie" or "show"; `ids` is the entry's saved numbers ({'tmdb': ..,
+    'plex': .., 'tunarr': ..}). Numbers are tried in priority order (TMDB, Plex, Tunarr).
+    If the first one stopped matching (a re-match changed it) but a spare still finds
+    the item, that's a heal: the caller gets the item's current numbers to re-save.
+    As a last resort the saved title + year may name exactly one item of that kind.
+
+    Returns (item, status, current_ids):
+      "ok"        the first saved number matched
+      "healed"    a spare number, or title + year, matched — re-save current_ids
+      "ambiguous" title + year fit more than one different item — ask the person
+      "missing"   nothing matched
+    """
+    by_id = id_index["by_id"].get(kind, {})
+    tried = [s for s in _ID_PRIORITY if ids.get(s)]
+    for n, source in enumerate(tried):
+        item = by_id.get((source, str(ids[source])))
+        if item is not None:
+            return item, ("ok" if n == 0 else "healed"), item["ids"]
+
+    if title:
+        want = title.lower().strip()
+        hits = [it for it in id_index["all"].get(kind, [])
+                if it["title"].lower().strip() == want and (year is None or it.get("year") == year)]
+        # Two library copies of the same movie share a TMDB number: still one item.
+        identities = {it["ids"].get("tmdb") or it["ids"].get("tunarr") or id(it) for it in hits}
+        if len(identities) == 1:
+            best = _best_copy(hits)
+            return best, "healed", best["ids"]
+        if len(identities) > 1:
+            return None, "ambiguous", None
+    return None, "missing", None
 
 
 # ── Title resolution ───────────────────────────────────────────────────────────
