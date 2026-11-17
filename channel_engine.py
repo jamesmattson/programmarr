@@ -310,7 +310,23 @@ def _build_id_index(movie_items, show_items):
                     by_id[kind].setdefault((source, value), []).append(item)
         for key, items_for_key in by_id[kind].items():
             by_id[kind][key] = _best_copy(items_for_key)
-    return {"by_id": by_id, "all": kinds}
+
+    # Plex's own answer about a collection carries a bare ratingKey, with no idea which
+    # Tunarr media source it belongs to — so also index Plex ids without that prefix.
+    by_plex_rating = {"movie": {}, "show": {}}
+    for kind in by_id:
+        for (source, value), item in by_id[kind].items():
+            if source == "plex":
+                by_plex_rating[kind].setdefault(value.split(":", 1)[-1], []).append(item)
+    return {"by_id": by_id, "all": kinds, "by_plex_rating": by_plex_rating}
+
+
+def find_by_plex_id(kind, plex_id, id_index):
+    """The library item with this bare Plex ratingKey, or None. Also None when two
+    different Plex servers both have that number — better to say "don't know" than to
+    pick one; the caller falls back to title + year."""
+    found = id_index["by_plex_rating"].get(kind, {}).get(str(plex_id), [])
+    return found[0] if len(found) == 1 else None
 
 
 def _scan_tunarr_library(tunarr_url):
@@ -689,13 +705,21 @@ def get_plex_sections(plex_url, token):
     return data["MediaContainer"].get("Directory", [])
 
 
-def resolve_collection(plex_url, token, name, sections, cache):
-    """Return a list of titles from a named Plex collection (cached)."""
+_PLEX_KIND = {"movie": "movie", "show": "show"}
+
+
+def resolve_collection_members(plex_url, token, name, sections, cache):
+    """The members of a named Plex collection (cached), as dicts:
+    {"title", "kind" ("movie" / "show" / None for anything else), "plex_id", "year"}.
+
+    Plex already says what each member IS and gives its own id in this same answer —
+    a title alone loses both, and then a movie and a same-named show can't be told apart.
+    """
     key = name.lower().strip()
     if key in cache:
         return cache[key]
 
-    titles = []
+    members = []
     for section in sections:
         section_key = section.get("key")
         data = plex_get(plex_url, token, f"/library/sections/{section_key}/collections")
@@ -715,28 +739,73 @@ def resolve_collection(plex_url, token, name, sections, cache):
                 items_data = plex_get(plex_url, token, children_path)
                 if items_data:
                     items = items_data["MediaContainer"].get("Metadata", [])
-                    titles = [item["title"] for item in items if item.get("title")]
-                    if titles:
+                    members = [
+                        {"title": item["title"],
+                         "kind": _PLEX_KIND.get(item.get("type")),
+                         "plex_id": str(item["ratingKey"]) if item.get("ratingKey") is not None else None,
+                         "year": item.get("year")}
+                        for item in items if item.get("title")
+                    ]
+                    if members:
                         break
             break
 
-    cache[key] = titles
-    return titles
+    cache[key] = members
+    return members
+
+
+def resolve_collection(plex_url, token, name, sections, cache):
+    """Return a list of titles from a named Plex collection (cached)."""
+    return [m["title"] for m in resolve_collection_members(plex_url, token, name, sections, cache)]
+
+
+def _resolve_collection_member(member, movie_map, show_map, id_index):
+    """Find the library item for one Plex collection member — by Plex's own id when we
+    have the id index, never by a bare title that could also be a different thing.
+
+    1. Plex's id (and whether it's a movie or a show) → the exact item.
+    2. Tunarr hasn't caught up (Plex gave it a new id, or an older Tunarr sends no ids):
+       the title + year, if that names exactly one item of that kind.
+    3. The year can't settle it — Tunarr has no year for the item, or a different one
+       (Plex and Tunarr often disagree by a year), or two items share title AND year:
+       the title alone, restricted to that kind. That is exactly what v0.8.1 matched
+       (bare title), so nothing it found goes missing; the kind still keeps a movie and
+       a same-named show apart.
+    A member with no year of its own whose title names several items of its kind is
+    reported missing rather than guessed — Plex always sends the year, so that only
+    happens for odd metadata.
+    Without the id index (older callers) it still uses the movie/show label, which is
+    enough to stop a movie and a same-named show being mixed up."""
+    kind = member.get("kind")
+    if id_index is None or kind is None:
+        return resolve_title(member["title"], movie_map, show_map, kind=kind)
+    if member.get("plex_id"):
+        item = find_by_plex_id(kind, member["plex_id"], id_index)
+        if item is not None:
+            return item
+    year = member.get("year")
+    item, status, _ids = resolve_by_ids(kind, {}, member["title"], year, id_index)
+    if item is not None:
+        return item
+    if year is None and status == "ambiguous":
+        return None
+    return resolve_title(member["title"], movie_map, show_map, kind=kind)
 
 
 # ── Content resolution ─────────────────────────────────────────────────────────
 
 def resolve_content(content_list, movie_map, show_map,
                     plex_url=None, plex_token=None, plex_sections=None, collection_cache=None,
-                    franchise_index=None):
+                    franchise_index=None, id_index=None):
     """Resolve a channel's content list into (resolved_items, missing).
 
     Each entry is one of:
     - A plain title string — matched against the Tunarr library index by exact title.
     - A {"movie": "Title"} or {"show": "Title"} ref — exact title, restricted to that
       media type (disambiguates a movie and a show that share a title).
-    - A {"collection": "Name"} ref — expanded to member titles via Plex, then each
-      title is matched against the library index.
+    - A {"collection": "Name"} ref — expanded to its members via Plex. Each member is
+      matched by Plex's own id (and movie/show label) through `id_index`, not by title,
+      so a collection's "Wonder Woman" the movie can't turn into the show.
     - A {"match": "title_contains", "value": "..."} ref — word-boundary scan of the
       Tunarr library; order/exclude supported.
     - A {"match": "franchise", "name": "..."} ref — identity-based resolution via the
@@ -760,10 +829,10 @@ def resolve_content(content_list, movie_map, show_map,
             expanded_titles.append((entry[kind], kind))  # resolved in order below
         elif isinstance(entry, dict) and "collection" in entry:
             col_name = entry["collection"]
-            col_titles = resolve_collection(plex_url, plex_token, col_name, plex_sections, collection_cache)
-            if col_titles:
-                expanded_titles.extend(col_titles)
-                print(f"    Collection '{col_name}': {len(col_titles)} titles")
+            col_members = resolve_collection_members(plex_url, plex_token, col_name, plex_sections, collection_cache)
+            if col_members:
+                expanded_titles.extend(col_members)  # dicts: matched by Plex id below
+                print(f"    Collection '{col_name}': {len(col_members)} titles")
             else:
                 print(f"    WARNING: Collection '{col_name}' not found in Plex")
                 missing.append(f"[collection:{col_name}]")
@@ -797,8 +866,12 @@ def resolve_content(content_list, movie_map, show_map,
 
     resolved = []
     for entry in expanded_titles:
-        title, kind = entry if isinstance(entry, tuple) else (entry, None)
-        item = resolve_title(title, movie_map, show_map, kind=kind)
+        if isinstance(entry, dict):  # a Plex collection member
+            title = entry["title"]
+            item = _resolve_collection_member(entry, movie_map, show_map, id_index)
+        else:
+            title, kind = entry if isinstance(entry, tuple) else (entry, None)
+            item = resolve_title(title, movie_map, show_map, kind=kind)
         if item:
             resolved.append(item)
         else:

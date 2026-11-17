@@ -110,7 +110,8 @@ async def apply_channel(number: int):
         raise HTTPException(400, "Tunarr not configured")
 
     def _do():
-        movie_map, show_map = channel_engine.build_library_index(tunarr_url)
+        library_index = channel_engine.build_library_index(tunarr_url)
+        movie_map, show_map = library_index
 
         plex_sections, collection_cache = [], {}
         if any(isinstance(it, dict) and "collection" in it for it in ch.get("content", [])):
@@ -122,6 +123,7 @@ async def apply_channel(number: int):
             plex_url=plex_url, plex_token=plex_token,
             plex_sections=plex_sections, collection_cache=collection_cache,
             franchise_index=channel_engine.load_franchise_index(DATA_DIR),
+            id_index=channel_engine.library_id_index(library_index),
         )
         if not resolved:
             raise channel_engine.ChannelEngineError(

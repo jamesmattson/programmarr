@@ -4,6 +4,17 @@ All notable changes to Programmarr are documented here. This project follows
 [Semantic Versioning](https://semver.org/) and the spirit of
 [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+### Fixed
+
+- **Plex collection members are matched by Plex id, not by title** (#40). A channel built
+  from a collection could play the *Wonder Woman* TV show instead of the movie in the
+  collection, because only each member's title was kept. Members are now matched by their
+  Plex id and type; one that can't be found is skipped and the rest still play. When Tunarr
+  has no id for a member (older Tunarr) or a different year, it is still found by its title
+  within its type, so every member v0.8.1 played still plays.
+
 ## [0.8.2] — 2026-11-21
 
 ### Fixed

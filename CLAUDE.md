@@ -232,8 +232,16 @@ call `channel_blocks.resolve_order` + `channel_blocks.assign_numbers` — single
 **shuffle values:** `ordered` | `shuffle` | `block`
 
 Content items can be plain title strings **or** Plex collection references
-(`{"collection": "Name"}`), freely mixed. Collection refs are expanded to member titles at
-deploy time via the Plex API; a not-found collection is warned and skipped. Plain titles must
+(`{"collection": "Name"}`), freely mixed. Collection refs are expanded to their members at
+deploy time via the Plex API; a not-found collection is warned and skipped. Each member is
+matched **by its Plex ratingKey and type** (movie/show) through the id index, not by bare
+title — so a collection's *Wonder Woman* movie can't turn into the same-named show. If Tunarr
+hasn't caught up with a new ratingKey (or an older Tunarr sends no ids), title + year is used
+when it names exactly one item of that type. When the year can't settle it — Tunarr has no year
+or a different one, or two items share title and year — the member falls back to the title
+alone **within its type** (what v0.8.1 matched, so nothing it found goes missing). A member with
+no year whose title names several items of its type is reported missing, never guessed; one
+unfound member never drops the rest. Plain titles must
 match Plex names exactly (case-insensitive). A title may appear on multiple channels —
 intentional. A title that exists as **both a movie and a show** resolves to whichever has
 more playable programs (a series beats a lone film) — pin it with a typed ref

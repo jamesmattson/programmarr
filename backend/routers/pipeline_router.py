@@ -2520,8 +2520,9 @@ async def run_surgical_deploy():
                     channel_engine.build_library_index, tunarr_url
                 )
                 movie_map_shared, show_map_shared = library_index
+                id_index_shared = channel_engine.library_id_index(library_index)
             else:
-                movie_map_shared, show_map_shared = {}, {}
+                movie_map_shared, show_map_shared, id_index_shared = {}, {}, None
 
             franchise_index_shared = channel_engine.load_franchise_index(DATA_DIR)
 
@@ -2537,7 +2538,7 @@ async def run_surgical_deploy():
                 yield _emit(f"  Updating #{num} {name} in place…")
 
                 def _do_update(ch=desired_ch, n=num, mv=movie_map_shared, sh=show_map_shared,
-                               fi=franchise_index_shared):
+                               fi=franchise_index_shared, ix=id_index_shared):
                     plex_sections, collection_cache = [], {}
                     if any(isinstance(it, dict) and "collection" in it for it in ch.get("content", [])):
                         if plex_url and plex_token:
@@ -2546,7 +2547,7 @@ async def run_surgical_deploy():
                         ch.get("content", []), mv, sh,
                         plex_url=plex_url, plex_token=plex_token,
                         plex_sections=plex_sections, collection_cache=collection_cache,
-                        franchise_index=fi,
+                        franchise_index=fi, id_index=ix,
                     )
                     if not resolved:
                         raise channel_engine.ChannelEngineError(
