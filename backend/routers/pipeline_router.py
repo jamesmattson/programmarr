@@ -17,6 +17,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 
 import channel_engine  # noqa: E402
+import library_cache  # noqa: E402
 import scheduler  # noqa: E402  (backend/ on sys.path) — shared deploy_lock
 
 # scheduler's import added SCRIPTS_DIR to sys.path, so the pure pipeline modules
@@ -166,15 +167,37 @@ def _sse(gen: AsyncGenerator[str, None]) -> StreamingResponse:
     )
 
 
+def _is_done_event(chunk: str) -> bool:
+    if not chunk.startswith("data: "):
+        return False
+    try:
+        return json.loads(chunk[6:].strip()).get("type") == "done"
+    except Exception:
+        return False
+
+
 async def _locked_stream(script: str, args: list[str], tag: str) -> AsyncGenerator[str, None]:
     """Stream a subprocess while holding the shared deploy_lock for its full duration.
 
     Used for create.py runs (probe/deploy) so the live-channel scheduler can't patch
     a channel in the middle of a deploy deleting/recreating it (and vice versa).
     """
-    async with scheduler.deploy_lock:
-        async for chunk in _stream(script, args, tag):
-            yield chunk
+    # A create.py deploy changes what is deployed: clear the editor's library cache before
+    # the client sees 'done' (whether or not it succeeded — a failed deploy may still have
+    # deleted or created channels). If the stream ends without 'done' (the browser went
+    # away and the generator was closed mid-run, or it raised), the finally still clears
+    # it. A probe changes nothing.
+    cleared = False
+    try:
+        async with scheduler.deploy_lock:
+            async for chunk in _stream(script, args, tag):
+                if tag == "deploy" and not cleared and _is_done_event(chunk):
+                    library_cache.invalidate()
+                    cleared = True
+                yield chunk
+    finally:
+        if tag == "deploy" and not cleared:
+            library_cache.invalidate()
 
 
 class ExportOptions(BaseModel):
@@ -2511,154 +2534,160 @@ async def run_surgical_deploy():
 
         errors: list[str] = []
 
-        async with scheduler.deploy_lock:
-            # ── 0. Build Tunarr library index once for all updates ────────────
-            # Hoisted out of the per-channel closure so the index is fetched only once
-            # regardless of how many channels need updating (Fix 3 — efficiency).
-            if diff["update"]:
-                library_index = await asyncio.to_thread(
-                    channel_engine.build_library_index, tunarr_url
-                )
-                movie_map_shared, show_map_shared = library_index
-                id_index_shared = channel_engine.library_id_index(library_index)
-            else:
-                movie_map_shared, show_map_shared, id_index_shared = {}, {}, None
-
-            franchise_index_shared = channel_engine.load_franchise_index(DATA_DIR)
-
-            # ── 1. Updates in place ───────────────────────────────────────────
-            for item in diff["update"]:
-                desired_ch = item["desired"]
-                # Target the DEPLOYED channel's number — update-in-place preserves the real
-                # Tunarr channel (id + DVR). The draft renumbers existing channels (Add/Edit
-                # numbers from highest+1), so desired_ch's number is a fresh high number that
-                # does NOT exist in Tunarr; using it would target a missing channel.
-                num = item["deployed"].get("number") or desired_ch.get("number")
-                name = desired_ch.get("name", "")
-                yield _emit(f"  Updating #{num} {name} in place…")
-
-                def _do_update(ch=desired_ch, n=num, mv=movie_map_shared, sh=show_map_shared,
-                               fi=franchise_index_shared, ix=id_index_shared):
-                    plex_sections, collection_cache = [], {}
-                    if any(isinstance(it, dict) and "collection" in it for it in ch.get("content", [])):
-                        if plex_url and plex_token:
-                            plex_sections = channel_engine.get_plex_sections(plex_url, plex_token)
-                    resolved, missing = channel_engine.resolve_content(
-                        ch.get("content", []), mv, sh,
-                        plex_url=plex_url, plex_token=plex_token,
-                        plex_sections=plex_sections, collection_cache=collection_cache,
-                        franchise_index=fi, id_index=ix,
+        # Clear the editor's library cache however this ends — finished, an error mid-way,
+        # or the browser going away (the generator is closed at a yield): any of these may
+        # already have changed what is deployed.
+        try:
+            async with scheduler.deploy_lock:
+                # ── 0. Build Tunarr library index once for all updates ────────────
+                # Hoisted out of the per-channel closure so the index is fetched only once
+                # regardless of how many channels need updating (Fix 3 — efficiency).
+                if diff["update"]:
+                    library_index = await asyncio.to_thread(
+                        channel_engine.build_library_index, tunarr_url
                     )
-                    if not resolved:
-                        raise channel_engine.ChannelEngineError(
-                            f"Channel #{n}: resolved to empty — refusing to update")
-                    comm = ch.get("commercials") or {}
-                    pad_ms = int(comm.get("pad_minutes", 5)) * 60000 if comm.get("filler_list_id") else 0
-                    channel_engine.update_channel_in_place(
-                        tunarr_url, n, ch.get("shuffle", "shuffle"), resolved, pad_ms=pad_ms,
-                        expected_name=ch.get("name"), playback=ch.get("playback"))
-                    return missing
+                    movie_map_shared, show_map_shared = library_index
+                    id_index_shared = channel_engine.library_id_index(library_index)
+                else:
+                    movie_map_shared, show_map_shared, id_index_shared = {}, {}, None
 
-                try:
-                    missing = await asyncio.to_thread(_do_update)
-                    if missing:
-                        yield _emit(f"    WARNING: {len(missing)} titles not found in library: {', '.join(missing[:5])}")
-                    yield _emit(f"  ✓ Updated #{num} {name}")
-                except channel_engine.ChannelEngineError as e:
-                    errors.append(f"#{num} {name}: {e}")
-                    yield _emit(f"  ! Error updating #{num} {name}: {e}")
+                franchise_index_shared = channel_engine.load_franchise_index(DATA_DIR)
 
-            # ── 2. Deletes ────────────────────────────────────────────────────
-            for dep_ch in diff["delete"]:
-                num = dep_ch.get("number")
-                name = dep_ch.get("name", "")
-                yield _emit(f"  Deleting #{num} {name}…")
+                # ── 1. Updates in place ───────────────────────────────────────────
+                for item in diff["update"]:
+                    desired_ch = item["desired"]
+                    # Target the DEPLOYED channel's number — update-in-place preserves the real
+                    # Tunarr channel (id + DVR). The draft renumbers existing channels (Add/Edit
+                    # numbers from highest+1), so desired_ch's number is a fresh high number that
+                    # does NOT exist in Tunarr; using it would target a missing channel.
+                    num = item["deployed"].get("number") or desired_ch.get("number")
+                    name = desired_ch.get("name", "")
+                    yield _emit(f"  Updating #{num} {name} in place…")
 
-                def _do_delete(n=num):
-                    tunarr_ch = channel_engine.find_channel_by_number(tunarr_url, n)
-                    if tunarr_ch:
-                        channel_engine.api(tunarr_url, "DELETE", f"/api/channels/{tunarr_ch['id']}")
-                    return tunarr_ch is not None
+                    def _do_update(ch=desired_ch, n=num, mv=movie_map_shared, sh=show_map_shared,
+                                   fi=franchise_index_shared, ix=id_index_shared):
+                        plex_sections, collection_cache = [], {}
+                        if any(isinstance(it, dict) and "collection" in it for it in ch.get("content", [])):
+                            if plex_url and plex_token:
+                                plex_sections = channel_engine.get_plex_sections(plex_url, plex_token)
+                        resolved, missing = channel_engine.resolve_content(
+                            ch.get("content", []), mv, sh,
+                            plex_url=plex_url, plex_token=plex_token,
+                            plex_sections=plex_sections, collection_cache=collection_cache,
+                            franchise_index=fi, id_index=ix,
+                        )
+                        if not resolved:
+                            raise channel_engine.ChannelEngineError(
+                                f"Channel #{n}: resolved to empty — refusing to update")
+                        comm = ch.get("commercials") or {}
+                        pad_ms = int(comm.get("pad_minutes", 5)) * 60000 if comm.get("filler_list_id") else 0
+                        channel_engine.update_channel_in_place(
+                            tunarr_url, n, ch.get("shuffle", "shuffle"), resolved, pad_ms=pad_ms,
+                            expected_name=ch.get("name"), playback=ch.get("playback"))
+                        return missing
 
-                try:
-                    found = await asyncio.to_thread(_do_delete)
-                    if not found:
-                        yield _emit(f"    (#{num} not in Tunarr — skipped)")
-                    yield _emit(f"  ✓ Deleted #{num} {name}")
-                except Exception as e:
-                    errors.append(f"delete #{num} {name}: {e}")
-                    yield _emit(f"  ! Error deleting #{num} {name}: {e}")
+                    try:
+                        missing = await asyncio.to_thread(_do_update)
+                        if missing:
+                            yield _emit(f"    WARNING: {len(missing)} titles not found in library: {', '.join(missing[:5])}")
+                        yield _emit(f"  ✓ Updated #{num} {name}")
+                    except channel_engine.ChannelEngineError as e:
+                        errors.append(f"#{num} {name}: {e}")
+                        yield _emit(f"  ! Error updating #{num} {name}: {e}")
 
-            # ── 3. Creates — run via create.py on a temp file ─────────────────
-            if diff["create"]:
-                create_temp = DATA_DIR / "surgical_create_temp.json"
-                create_data = {**draft_data, "channels": diff["create"]}
-                with open(create_temp, "w", encoding="utf-8") as f:
-                    json.dump(create_data, f, indent=2, ensure_ascii=False)
-                yield _emit(f"  Creating {len(diff['create'])} new channel(s) via create.py…")
+                # ── 2. Deletes ────────────────────────────────────────────────────
+                for dep_ch in diff["delete"]:
+                    num = dep_ch.get("number")
+                    name = dep_ch.get("name", "")
+                    yield _emit(f"  Deleting #{num} {name}…")
 
-                collected: list[str] = []
-                create_ok = False
-                async for chunk in _stream("create.py", ["--json", "surgical_create_temp.json", "--no-delete"], "surgical_create"):
-                    if chunk.startswith("data: "):
-                        try:
-                            payload = json.loads(chunk[6:].strip())
-                            if payload.get("type") == "line":
-                                collected.append(payload["text"])
+                    def _do_delete(n=num):
+                        tunarr_ch = channel_engine.find_channel_by_number(tunarr_url, n)
+                        if tunarr_ch:
+                            channel_engine.api(tunarr_url, "DELETE", f"/api/channels/{tunarr_ch['id']}")
+                        return tunarr_ch is not None
+
+                    try:
+                        found = await asyncio.to_thread(_do_delete)
+                        if not found:
+                            yield _emit(f"    (#{num} not in Tunarr — skipped)")
+                        yield _emit(f"  ✓ Deleted #{num} {name}")
+                    except Exception as e:
+                        errors.append(f"delete #{num} {name}: {e}")
+                        yield _emit(f"  ! Error deleting #{num} {name}: {e}")
+
+                # ── 3. Creates — run via create.py on a temp file ─────────────────
+                if diff["create"]:
+                    create_temp = DATA_DIR / "surgical_create_temp.json"
+                    create_data = {**draft_data, "channels": diff["create"]}
+                    with open(create_temp, "w", encoding="utf-8") as f:
+                        json.dump(create_data, f, indent=2, ensure_ascii=False)
+                    yield _emit(f"  Creating {len(diff['create'])} new channel(s) via create.py…")
+
+                    collected: list[str] = []
+                    create_ok = False
+                    async for chunk in _stream("create.py", ["--json", "surgical_create_temp.json", "--no-delete"], "surgical_create"):
+                        if chunk.startswith("data: "):
+                            try:
+                                payload = json.loads(chunk[6:].strip())
+                                if payload.get("type") == "line":
+                                    collected.append(payload["text"])
+                                    yield chunk
+                                elif payload.get("type") == "done":
+                                    create_ok = payload.get("returncode") == 0
+                                    yield chunk
+                            except Exception:
                                 yield chunk
-                            elif payload.get("type") == "done":
-                                create_ok = payload.get("returncode") == 0
-                                yield chunk
-                        except Exception:
+                        else:
                             yield chunk
-                    else:
-                        yield chunk
 
-                if create_temp.exists():
-                    create_temp.unlink()
+                    if create_temp.exists():
+                        create_temp.unlink()
 
-                if not create_ok:
-                    errors.append("create.py failed for new channels")
+                    if not create_ok:
+                        errors.append("create.py failed for new channels")
 
-            # ── 4. Write channels.json — merge all buckets ────────────────────
-            # The new channels.json contains:
-            #   • all desired channels (create + update + unchanged — from the draft)
-            #   • all foreign channels (hand-authored, absent from desired, NOT in
-            #     prior_managed — must be preserved untouched)
-            # Channels in diff["delete"] are intentionally excluded (they're not in desired).
-            #
-            # Existing channels (update + unchanged) keep their DEPLOYED number; only genuine
-            # new (create) channels use their draft number. (See merge_deployed_numbers.)
-            new_managed = channel_engine.merge_deployed_numbers(desired, deployed)
+                # ── 4. Write channels.json — merge all buckets ────────────────────
+                # The new channels.json contains:
+                #   • all desired channels (create + update + unchanged — from the draft)
+                #   • all foreign channels (hand-authored, absent from desired, NOT in
+                #     prior_managed — must be preserved untouched)
+                # Channels in diff["delete"] are intentionally excluded (they're not in desired).
+                #
+                # Existing channels (update + unchanged) keep their DEPLOYED number; only genuine
+                # new (create) channels use their draft number. (See merge_deployed_numbers.)
+                new_managed = channel_engine.merge_deployed_numbers(desired, deployed)
 
-            # Append foreign channels — they were not in desired but must be kept.
-            new_managed.extend(diff["foreign"])
+                # Append foreign channels — they were not in desired but must be kept.
+                new_managed.extend(diff["foreign"])
 
-            new_managed.sort(key=lambda c: c.get("number", 0))
-            out_data = {
-                "channels": new_managed,
-                "orphaned": [],
-                "suggested_channels": [],
-            }
-            with open(canon_path, "w", encoding="utf-8") as f:
-                json.dump(out_data, f, indent=2, ensure_ascii=False)
+                new_managed.sort(key=lambda c: c.get("number", 0))
+                out_data = {
+                    "channels": new_managed,
+                    "orphaned": [],
+                    "suggested_channels": [],
+                }
+                with open(canon_path, "w", encoding="utf-8") as f:
+                    json.dump(out_data, f, indent=2, ensure_ascii=False)
 
-            # Persist managed_names so future surgical deploys know which channels
-            # were planner-built (provenance for delete safety).
-            new_managed_names = [(ch.get("name") or "").strip() for ch in desired if ch.get("name")]
-            updated_planner_state = {**planner_state, "managed_names": new_managed_names}
-            try:
-                tmp = planner_state_path.with_suffix(".json.tmp")
-                with open(tmp, "w", encoding="utf-8") as f:
-                    json.dump(updated_planner_state, f, indent=2, ensure_ascii=False)
-                tmp.replace(planner_state_path)
-            except Exception as e:
-                # Non-fatal — log but don't fail the deploy.
-                yield _emit(f"  WARNING: could not update planner_state.json managed_names: {e}")
+                # Persist managed_names so future surgical deploys know which channels
+                # were planner-built (provenance for delete safety).
+                new_managed_names = [(ch.get("name") or "").strip() for ch in desired if ch.get("name")]
+                updated_planner_state = {**planner_state, "managed_names": new_managed_names}
+                try:
+                    tmp = planner_state_path.with_suffix(".json.tmp")
+                    with open(tmp, "w", encoding="utf-8") as f:
+                        json.dump(updated_planner_state, f, indent=2, ensure_ascii=False)
+                    tmp.replace(planner_state_path)
+                except Exception as e:
+                    # Non-fatal — log but don't fail the deploy.
+                    yield _emit(f"  WARNING: could not update planner_state.json managed_names: {e}")
 
-            # Clear the draft.
-            if draft_path.exists():
-                draft_path.unlink()
+                # Clear the draft.
+                if draft_path.exists():
+                    draft_path.unlink()
+        finally:
+            library_cache.invalidate()
 
         if errors:
             yield _emit(f"Completed with {len(errors)} error(s): {'; '.join(errors)}")

@@ -38,6 +38,7 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 import channel_engine  # noqa: E402
+import library_cache   # noqa: E402
 
 # Shared with pipeline_router: any endpoint that spawns create.py acquires this so
 # a manual deploy and a scheduler cycle never touch Tunarr at the same time.
@@ -190,68 +191,74 @@ def _run_cycle_blocking(apply: bool, only: int = None) -> dict:
            for ch in live for it in ch.get("content", [])):
         franchise_index = channel_engine.load_franchise_index(DATA_DIR)
 
-    for ch in live:
-        number = ch.get("number")
-        name = ch.get("name", "Unnamed")
-        resolved, _missing = channel_engine.resolve_content(
-            ch.get("content", []), movie_map, show_map,
-            plex_url=plex_url, plex_token=plex_token,
-            plex_sections=plex_sections, collection_cache=collection_cache,
-            franchise_index=franchise_index, id_index=id_index,
-        )
-        fresh_ids = _program_ids(resolved)
+    # A channel was patched: drop the editor's cached library view. In a finally, so a
+    # channel patched before a later one raised still clears it.
+    try:
+        for ch in live:
+            number = ch.get("number")
+            name = ch.get("name", "Unnamed")
+            resolved, _missing = channel_engine.resolve_content(
+                ch.get("content", []), movie_map, show_map,
+                plex_url=plex_url, plex_token=plex_token,
+                plex_sections=plex_sections, collection_cache=collection_cache,
+                franchise_index=franchise_index, id_index=id_index,
+            )
+            fresh_ids = _program_ids(resolved)
 
-        tch = channel_engine.find_channel_by_number(tunarr_url, number)
-        if not tch:
-            summary["skipped"].append({"number": number, "name": name, "reason": "not in Tunarr"})
-            continue
-        # Guard the by-number scramble: if the Tunarr channel at this number is not the
-        # one our record names, channels.json has drifted out of sync with Tunarr — skip
-        # rather than overwrite the wrong channel. (See channel_engine.update_channel_in_place.)
-        if (tch.get("name") or "").strip().lower() != name.strip().lower():
-            summary["skipped"].append({
-                "number": number, "name": name,
-                "reason": (f"name mismatch — Tunarr #{number} is '{tch.get('name')}', "
-                           f"record expects '{name}'; refusing to overwrite (out of sync)")})
-            continue
-        cur_ids = channel_engine.read_channel_programming(tunarr_url, tch["id"])
-        if cur_ids is None:
-            summary["skipped"].append({"number": number, "name": name, "reason": "could not read programming"})
-            continue
-
-        if fresh_ids == cur_ids:
-            continue  # no change — cheap no-op, no guide churn
-
-        added, removed = fresh_ids - cur_ids, cur_ids - fresh_ids
-        change = {
-            "number": number,
-            "name": name,
-            "added": _summarize(added, id_label),
-            "added_count": len(added),
-            "removed_count": len(removed),
-            "applied": False,
-        }
-        if apply:
-            if not fresh_ids:
-                # resolves to nothing — refuse to wipe the channel; flag it
-                summary["skipped"].append({"number": number, "name": name, "reason": "resolved to empty — not patched"})
+            tch = channel_engine.find_channel_by_number(tunarr_url, number)
+            if not tch:
+                summary["skipped"].append({"number": number, "name": name, "reason": "not in Tunarr"})
                 continue
-            try:
-                # Preserve the commercial gap on live channels (filler stays attached;
-                # only the pad needs re-applying each cycle).
-                comm = ch.get("commercials") or {}
-                pad_ms = int(comm.get("pad_minutes", 5)) * 60000 if comm.get("filler_list_id") else 0
-                channel_engine.update_channel_in_place(
-                    tunarr_url, number, ch.get("shuffle", "shuffle"), resolved,
-                    pad_ms=pad_ms, expected_name=name, playback=ch.get("playback"))
-                change["applied"] = True
-            except channel_engine.ChannelEngineError as e:
-                summary["skipped"].append({"number": number, "name": name, "reason": str(e)})
+            # Guard the by-number scramble: if the Tunarr channel at this number is not the
+            # one our record names, channels.json has drifted out of sync with Tunarr — skip
+            # rather than overwrite the wrong channel. (See channel_engine.update_channel_in_place.)
+            if (tch.get("name") or "").strip().lower() != name.strip().lower():
+                summary["skipped"].append({
+                    "number": number, "name": name,
+                    "reason": (f"name mismatch — Tunarr #{number} is '{tch.get('name')}', "
+                               f"record expects '{name}'; refusing to overwrite (out of sync)")})
                 continue
-        summary["changes"].append(change)
+            cur_ids = channel_engine.read_channel_programming(tunarr_url, tch["id"])
+            if cur_ids is None:
+                summary["skipped"].append({"number": number, "name": name, "reason": "could not read programming"})
+                continue
 
-    summary["changed"] = len(summary["changes"])
-    _write_log(summary)
+            if fresh_ids == cur_ids:
+                continue  # no change — cheap no-op, no guide churn
+
+            added, removed = fresh_ids - cur_ids, cur_ids - fresh_ids
+            change = {
+                "number": number,
+                "name": name,
+                "added": _summarize(added, id_label),
+                "added_count": len(added),
+                "removed_count": len(removed),
+                "applied": False,
+            }
+            if apply:
+                if not fresh_ids:
+                    # resolves to nothing — refuse to wipe the channel; flag it
+                    summary["skipped"].append({"number": number, "name": name, "reason": "resolved to empty — not patched"})
+                    continue
+                try:
+                    # Preserve the commercial gap on live channels (filler stays attached;
+                    # only the pad needs re-applying each cycle).
+                    comm = ch.get("commercials") or {}
+                    pad_ms = int(comm.get("pad_minutes", 5)) * 60000 if comm.get("filler_list_id") else 0
+                    channel_engine.update_channel_in_place(
+                        tunarr_url, number, ch.get("shuffle", "shuffle"), resolved,
+                        pad_ms=pad_ms, expected_name=name, playback=ch.get("playback"))
+                    change["applied"] = True
+                except channel_engine.ChannelEngineError as e:
+                    summary["skipped"].append({"number": number, "name": name, "reason": str(e)})
+                    continue
+            summary["changes"].append(change)
+
+        summary["changed"] = len(summary["changes"])
+        _write_log(summary)
+    finally:
+        if any(c.get("applied") for c in summary["changes"]):
+            library_cache.invalidate()
 
     # Record cosmetic per-channel sync metadata (apply cycles only — a dry run
     # isn't a real "sync"). Carries forward prior change info for unchanged channels.

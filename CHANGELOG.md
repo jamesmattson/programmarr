@@ -13,6 +13,16 @@ All notable changes to Programmarr are documented here. This project follows
   "tunarr": "…"}}` — so two things that share a title (the 1992 and 2019 *Aladdin*) can't be
   mixed up. If the first id goes stale (e.g. after a Plex re-match) a spare id still finds it;
   nothing is ever guessed. Plain titles and older entries resolve exactly as before.
+- **`GET /api/library/lookup`** lists every library item with an exact title, each with its
+  ready-to-save pinned entry, and **`GET /api/channels/{n}/review`** checks one channel against
+  the library without changing anything (skipped items, and titles that match more than one
+  item). Both read a 5-minute library cache that is cleared after every deploy, Apply, and
+  live-channel update that changed something (also when it is interrupted or fails part-way).
+  Only one library scan runs at a time: a request that arrives while one is running waits for
+  it instead of starting a second scan of Tunarr.
+- **Save and Apply refreshes a stale id** when a spare id confirms it is the same item, so the
+  entry matches on its first id again. An entry found only by title and year is never
+  rewritten.
 
 ### Fixed
 

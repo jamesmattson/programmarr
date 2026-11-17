@@ -13,6 +13,7 @@ if str(_BACKEND) not in sys.path:
     sys.path.insert(0, str(_BACKEND))
 
 import channel_engine  # noqa: E402
+import library_cache   # noqa: E402
 import scheduler       # noqa: E402  (shared deploy_lock)
 import badge_renderer  # noqa: E402
 import icon_engine     # noqa: E402
@@ -109,9 +110,12 @@ async def apply_channel(number: int):
     if not tunarr_url:
         raise HTTPException(400, "Tunarr not configured")
 
+    reached_tunarr = {"patched": False}  # set once Tunarr's channel has been patched
+
     def _do():
         library_index = channel_engine.build_library_index(tunarr_url)
         movie_map, show_map = library_index
+        report = {}
 
         plex_sections, collection_cache = [], {}
         if any(isinstance(it, dict) and "collection" in it for it in ch.get("content", [])):
@@ -123,7 +127,7 @@ async def apply_channel(number: int):
             plex_url=plex_url, plex_token=plex_token,
             plex_sections=plex_sections, collection_cache=collection_cache,
             franchise_index=channel_engine.load_franchise_index(DATA_DIR),
-            id_index=channel_engine.library_id_index(library_index),
+            id_index=channel_engine.library_id_index(library_index), report=report,
         )
         if not resolved:
             raise channel_engine.ChannelEngineError(
@@ -138,6 +142,21 @@ async def apply_channel(number: int):
         channel_engine.update_channel_in_place(
             tunarr_url, number, ch.get("shuffle", "shuffle"), resolved, pad_ms=pad_ms,
             expected_name=ch.get("name"), playback=ch.get("playback"))
+        reached_tunarr["patched"] = True
+
+        # An entry whose first id went stale but that a spare id confirmed gets the item's
+        # current ids written back, so the next resolve matches on the first id. Re-loaded
+        # fresh, and only that channel's content is touched. (Entries found only by title +
+        # year are never reported as healed, so they are never rewritten.)
+        if report.get("healed"):
+            data = load()
+            for saved in data.get("channels", []):
+                if saved.get("number") == number:
+                    refreshed = channel_engine.apply_healed(saved.get("content", []), report["healed"])
+                    if refreshed != saved.get("content"):
+                        saved["content"] = refreshed
+                        save(data)
+                    break
         return len(resolved)
 
     try:
@@ -146,6 +165,11 @@ async def apply_channel(number: int):
         return {"ok": True, "number": number, "program_count": count}
     except channel_engine.ChannelEngineError as e:
         raise HTTPException(409, str(e))
+    finally:
+        # Once Tunarr was patched the library view is out of date — clear it even if a
+        # later step (writing healed ids back) failed. Refused before Tunarr: keep it.
+        if reached_tunarr["patched"]:
+            library_cache.invalidate()
 
 
 @router.post("/channels/{number}/icon")
@@ -228,6 +252,71 @@ async def channel_icon(number: int, body: dict):
         ch["icon"] = {"mode": mode, "url": url, "pinned": True}
     save(data)
     return {"ok": True, "mode": mode, "url": url}
+
+
+def _tunarr_url_or_400(cfg):
+    tunarr_url = cfg.get("tunarr_url", "").rstrip("/")
+    if not tunarr_url:
+        raise HTTPException(400, "Tunarr not configured")
+    channel_engine.set_tunarr_auth_from_config(cfg)
+    return tunarr_url
+
+
+@router.get("/library/lookup")
+async def library_lookup(title: str, kind: str = "", refresh: bool = False):
+    """Every movie/show in the library with exactly this title, each with a ready-to-save
+    channel entry that carries its own ids ({"movie": .., "year": .., "ids": {..}}).
+    One match: the Add box pins it. Several: it asks. None: it adds the text as typed."""
+    if kind not in ("", "movie", "show"):
+        raise HTTPException(400, "kind must be 'movie' or 'show'")
+    tunarr_url = _tunarr_url_or_400(_load_config())
+    try:
+        library_index = await asyncio.to_thread(library_cache.get, tunarr_url, refresh)
+    except channel_engine.ChannelEngineError as e:
+        raise HTTPException(502, str(e))
+    id_index = channel_engine.library_id_index(library_index)
+    if id_index is None:
+        return {"matches": []}
+    matches = []
+    for item in channel_engine.find_by_title(title, id_index, kind or None):
+        k = "movie" if item["type"] == "Movie" else "show"
+        matches.append({"kind": k, "title": item["title"], "year": item.get("year"),
+                        "entry": channel_engine.entry_for_item(item)})
+    return {"matches": matches}
+
+
+@router.get("/channels/{number}/review")
+async def channel_review(number: int, refresh: bool = False):
+    """Check ONE channel against the library right now, without deploying anything: what
+    it would skip (and why), what it would find again through a spare id, and every plain
+    title that names more than one movie/show, with the choices. Nothing is written, and
+    Tunarr's channels are never touched; the editor shows this when it opens."""
+    ch = next((c for c in load().get("channels", []) if c.get("number") == number), None)
+    if ch is None:
+        raise HTTPException(404, f"Channel {number} not in channels.json")
+    cfg = _load_config()
+    tunarr_url = _tunarr_url_or_400(cfg)
+    plex_url, plex_token = cfg.get("plex_url", "").rstrip("/"), cfg.get("plex_token", "")
+
+    def _check():
+        library_index = library_cache.get(tunarr_url, refresh)
+        movie_map, show_map = library_index
+        content = ch.get("content", [])
+        plex_sections = []
+        if plex_url and plex_token and any(isinstance(it, dict) and "collection" in it for it in content):
+            plex_sections = channel_engine.get_plex_sections(plex_url, plex_token)
+        report = {}
+        channel_engine.resolve_content(
+            content, movie_map, show_map, plex_url=plex_url, plex_token=plex_token,
+            plex_sections=plex_sections, collection_cache={},
+            franchise_index=channel_engine.load_franchise_index(DATA_DIR),
+            id_index=channel_engine.library_id_index(library_index), report=report)
+        return channel_engine.summarize_report(report)
+
+    try:
+        return await asyncio.to_thread(_check)
+    except channel_engine.ChannelEngineError as e:
+        raise HTTPException(502, str(e))
 
 
 @router.get("/library/titles")
