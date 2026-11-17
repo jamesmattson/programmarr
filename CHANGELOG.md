@@ -27,6 +27,10 @@ All notable changes to Programmarr are documented here. This project follows
   library first: one match is saved with its ids, several (the two *Aladdin*s) show a picker,
   and none is added as typed, as before. `{collection: …}` is never looked up. Editing and
   saving a channel no longer drops the extra keys on an entry; pinned rows show "· pinned".
+- **Choose which version plays, in the channel editor.** Opening a channel now flags every
+  plain title that matches more than one item (e.g. *Beauty and the Beast* 1991 / 2017) with
+  a button per version plus **Both**, and says which one plays now. Choosing swaps the plain
+  title for the pinned entry; nothing changes until Save and Apply.
 
 ### Fixed
 

@@ -10,7 +10,7 @@ import {
 } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { api, Channel, ChannelSyncState, ContentItem, FillerList, FranchiseRef, isMatchRef, LibraryMatch, RecipeMatch, TunarrChannel } from '../api/client';
+import { AmbiguousChoice, api, Channel, ChannelReview, ChannelSyncState, ContentItem, FillerList, FranchiseRef, isMatchRef, LibraryMatch, RecipeMatch, TunarrChannel } from '../api/client';
 
 function syncedAgo(iso?: string): string {
   if (!iso) return 'never';
@@ -19,6 +19,13 @@ function syncedAgo(iso?: string): string {
   if (secs < 3600) return `${Math.round(secs / 60)}m ago`;
   if (secs < 86400) return `${Math.round(secs / 3600)}h ago`;
   return `${Math.round(secs / 86400)}d ago`;
+}
+
+// "1991" / "2017" — or "movie 2017" / "show 1975" when the choice mixes movies and shows.
+function optionLabel(a: AmbiguousChoice, o: AmbiguousChoice['options'][number]): string {
+  const mixed = new Set(a.options.map((x) => x.kind)).size > 1;
+  const year = o.year ? String(o.year) : o.title;
+  return mixed ? `${o.kind} ${year}` : year;
 }
 
 const SHUFFLE_COLOR: Record<string, string> = { ordered: 'blue', block: 'violet', shuffle: 'teal' };
@@ -196,6 +203,8 @@ function ChannelModal({
   const [newItem, setNewItem] = useState('');
   const [looking, setLooking] = useState(false);
   const [choices, setChoices] = useState<{ text: string; matches: LibraryMatch[] } | null>(null);
+  // A live check of this channel against the library, fetched when the editor opens.
+  const [review, setReview] = useState<ChannelReview | null>(null);
   const [live, setLive] = useState(false);
   const [matchRef, setMatchRef] = useState<MatchRule | null>(null);
   const [franchiseRefs, setFranchiseRefs] = useState<FranchiseRef[]>([]);
@@ -250,6 +259,38 @@ function ChannelModal({
         .map(rowFromEntry)
     );
   }, [channel]);
+
+  useEffect(() => {
+    setReview(null);
+    if (!channel || !opened) return;
+    let alive = true;
+    api.getChannelReview(channel.number).then((r) => { if (alive) setReview(r); }).catch(() => {});
+    return () => { alive = false; };
+  }, [channel, opened]);
+
+  // Swap a plain title for the exact item(s) the person picked. Nothing is saved until
+  // Save and Apply, like every other edit here.
+  function choose(a: AmbiguousChoice, options: AmbiguousChoice['options']) {
+    const want = a.label.toLowerCase().trim();
+    const isTarget = (row: ContentRow) => {
+      if (row.raw === null) return row.label.toLowerCase().trim() === want;
+      const o = row.raw as unknown as Record<string, unknown>;
+      const title = o.movie ?? o.show;
+      return typeof title === 'string' && !o.ids && title.toLowerCase().trim() === want;
+    };
+    setContent((rows) => {
+      const out: ContentRow[] = [];
+      let placed = false;
+      for (const r of rows) {
+        if (!isTarget(r)) { out.push(r); continue; }
+        if (!placed) { options.forEach((o) => out.push(rowFromEntry(o.entry))); placed = true; }
+      }
+      return out;
+    });
+    setReview((r) => (r ? {
+      ...r, ambiguous: r.ambiguous.filter((x) => x !== a), ambiguous_count: Math.max(0, r.ambiguous_count - 1),
+    } : r));
+  }
 
   function pushRow(row: ContentRow) {
     setContent((c) => [...c, row]);
@@ -386,6 +427,33 @@ function ChannelModal({
         />
 
         <Divider label="Content" labelPosition="left" />
+
+        {review && review.ambiguous.length > 0 && (
+          <Card withBorder p="xs" style={{ background: 'var(--surface-panel)' }}>
+            <Text size="xs" fw={600} c="orange" mb={4}>
+              {review.ambiguous_count} title{review.ambiguous_count === 1 ? '' : 's'} match more than one item — pick which to play:
+            </Text>
+            <Stack gap={6} style={{ maxHeight: 280, overflowY: 'auto' }}>
+              {review.ambiguous.map((a) => (
+                <Group key={`${a.label}|${a.kind ?? ''}`} gap={6}>
+                  <Text size="xs" style={{ fontFamily: 'ui-monospace, monospace' }}>{a.label}</Text>
+                  {a.options.map((o, i) => (
+                    <Button key={i} size="compact-xs" variant="light" color="orange" onClick={() => choose(a, [o])}>
+                      {optionLabel(a, o)}
+                    </Button>
+                  ))}
+                  <Button size="compact-xs" variant="subtle" color="gray" onClick={() => choose(a, a.options)}>
+                    Both
+                  </Button>
+                  {a.current !== null && a.options[a.current] && (
+                    <Text size="xs" c="dimmed">plays now: {optionLabel(a, a.options[a.current])}</Text>
+                  )}
+                </Group>
+              ))}
+            </Stack>
+            <Text size="xs" c="dimmed" mt={4}>Your choices take effect after Save and Apply.</Text>
+          </Card>
+        )}
 
         <Stack gap={4}>
           {content.map((row, i) => (
