@@ -318,7 +318,13 @@ def _build_id_index(movie_items, show_items):
         for (source, value), item in by_id[kind].items():
             if source == "plex":
                 by_plex_rating[kind].setdefault(value.split(":", 1)[-1], []).append(item)
-    return {"by_id": by_id, "all": kinds, "by_plex_rating": by_plex_rating}
+    by_title = {"movie": {}, "show": {}}
+    for kind, items in kinds.items():
+        for item in items:
+            key = item["title"].lower().strip()
+            if key:
+                by_title[kind].setdefault(key, []).append(item)
+    return {"by_id": by_id, "all": kinds, "by_plex_rating": by_plex_rating, "by_title": by_title}
 
 
 def find_by_plex_id(kind, plex_id, id_index):
@@ -475,6 +481,108 @@ def build_library_index_with_ids(tunarr_url):
     """build_library_index unpacked as (movie_map, show_map, id_index)."""
     index = build_library_index(tunarr_url)
     return index[0], index[1], library_id_index(index)
+
+
+def find_by_title(title, id_index, kind=None):
+    """Every distinct movie/show whose title is exactly `title` (case-insensitive) —
+    for the Add box, which has to ask "which one?" when there is more than one.
+
+    Two library copies of the same thing (an HD and a 4K library) count as one; the
+    playable copy is returned. Movies first, then shows, oldest first."""
+    want = (title or "").lower().strip()
+    if not want:
+        return []
+    found = []
+    for k in ((kind,) if kind else ("movie", "show")):
+        groups = {}
+        by_title = id_index.get("by_title")
+        pool = (by_title[k].get(want, []) if by_title is not None
+                else [it for it in id_index["all"].get(k, []) if it["title"].lower().strip() == want])
+        for item in pool:
+            identity = item["ids"].get("tmdb") or item["ids"].get("tunarr") or id(item)
+            groups.setdefault(identity, []).append(item)
+        picked = [_best_copy(items) for items in groups.values()]
+        found += sorted(picked, key=lambda it: (it.get("year") or 0, it["title"]))
+    return found
+
+
+def entry_for_item(item):
+    """The channel entry that pins exactly this item: the developer's own typed ref plus
+    the item's year and numbers."""
+    kind = "movie" if item["type"] == "Movie" else "show"
+    entry = {kind: item["title"], "ids": item["ids"]}
+    if item.get("year"):
+        entry["year"] = item["year"]
+    return entry
+
+
+def _find_ambiguity(title, kind, movie_map, show_map, id_index):
+    """If `title` (optionally limited to a movie/show) names more than one thing in the
+    library, describe the choice: the options — each with its ready-to-save pinned entry —
+    and which one the channel plays right now (title lookups keep only one)."""
+    options = find_by_title(title, id_index, kind)
+    if len(options) < 2:
+        return None
+    playing = resolve_title(title, movie_map, show_map, kind=kind)
+    current = None
+    if playing:
+        playing_id = playing["showId"] if playing["type"] == "TV" else playing["programs"][0].get("id")
+        current = next((i for i, o in enumerate(options) if o["ids"].get("tunarr") == str(playing_id)), None)
+    return {
+        "label": title, "kind": kind, "current": current,
+        "options": [{"kind": "movie" if o["type"] == "Movie" else "show", "title": o["title"],
+                     "year": o.get("year"), "entry": entry_for_item(o)} for o in options],
+    }
+
+
+def _confirmed_by_id(saved_ids, item):
+    """True when one of the entry's saved ids still names this exact item — i.e. the item
+    was found through an id, not through a title + year fallback."""
+    return any(v and item["ids"].get(s) == str(v) for s, v in (saved_ids or {}).items())
+
+
+# Display caps for a review: a collection with 300 unsynced members shouldn't become a
+# 300-line warning. The true counts are always kept.
+REVIEW_MAX_MISSING = 25
+REVIEW_MAX_AMBIGUOUS = 50
+
+
+def summarize_report(report):
+    """A resolve_content `report` shaped for a screen: counts plus capped lists. Pure — no
+    timestamp, nothing written. A clean report gives all zeros."""
+    report = report or {}
+    missing = report.get("missing", [])
+    ambiguous = report.get("ambiguous", [])
+    return {
+        "missing_count": len(missing),
+        "missing": [{"label": str(m["label"])[:120], "why": m["why"]}
+                    for m in missing[:REVIEW_MAX_MISSING]],
+        "healed_count": len(report.get("healed", [])),
+        "ambiguous_count": len(ambiguous),
+        "ambiguous": ambiguous[:REVIEW_MAX_AMBIGUOUS],
+    }
+
+
+def apply_healed(content, healed):
+    """A channel's content with each entry that resolve_content re-found through a backup
+    id (report["healed"]) refreshed to the item's current numbers, year and title —
+    so the next resolve matches on the first number again instead of healing every time.
+    An entry that is no longer exactly what was resolved (the person edited the channel in
+    between) is left alone."""
+    by_entry = {json.dumps(h["entry"], sort_keys=True): h for h in healed}
+    out = []
+    for entry in content:
+        h = by_entry.get(json.dumps(entry, sort_keys=True)) if isinstance(entry, dict) else None
+        if h is None:
+            out.append(entry)
+            continue
+        new = dict(entry)
+        new[h["kind"]] = h["title"]
+        new["ids"] = h["ids"]
+        if h.get("year"):
+            new["year"] = h["year"]
+        out.append(new)
+    return out
 
 
 def resolve_by_ids(kind, ids, title, year, id_index):
@@ -708,6 +816,11 @@ def get_plex_sections(plex_url, token):
 _PLEX_KIND = {"movie": "movie", "show": "show"}
 
 
+class _Resolved(dict):
+    """An item resolve_content has already matched (a saved entry that carries ids),
+    waiting in the ordered list so it keeps its place among the other entries."""
+
+
 def resolve_collection_members(plex_url, token, name, sections, cache):
     """The members of a named Plex collection (cached), as dicts:
     {"title", "kind" ("movie" / "show" / None for anything else), "plex_id", "year"}.
@@ -796,13 +909,18 @@ def _resolve_collection_member(member, movie_map, show_map, id_index):
 
 def resolve_content(content_list, movie_map, show_map,
                     plex_url=None, plex_token=None, plex_sections=None, collection_cache=None,
-                    franchise_index=None, id_index=None):
+                    franchise_index=None, id_index=None, report=None):
     """Resolve a channel's content list into (resolved_items, missing).
 
     Each entry is one of:
     - A plain title string — matched against the Tunarr library index by exact title.
     - A {"movie": "Title"} or {"show": "Title"} ref — exact title, restricted to that
       media type (disambiguates a movie and a show that share a title).
+    - The same ref with saved numbers — {"movie": "Aladdin", "year": 2019, "ids":
+      {"tmdb": .., "plex": .., "tunarr": ..}} — finds that exact item by its numbers
+      through `id_index` (see resolve_by_ids), so two things sharing a title can't be
+      mixed up. A stale number heals from a spare; if nothing fits it is reported as
+      missing and never guessed. Without `id_index` the title and type are used.
     - A {"collection": "Name"} ref — expanded to its members via Plex. Each member is
       matched by Plex's own id (and movie/show label) through `id_index`, not by title,
       so a collection's "Wonder Woman" the movie can't turn into the show.
@@ -815,6 +933,18 @@ def resolve_content(content_list, movie_map, show_map,
 
     Returns (resolved_items, missing): resolved_items are ready for build_schedule;
     missing is a list of titles/ref labels that could not be found.
+
+    Pass a dict as `report` to also learn WHY, so a screen can tell the person instead of
+    the item vanishing silently. It is filled with:
+      report["missing"] = [{"label": .., "why": ..}]   — what was skipped, and the reason
+      report["ambiguous"] = [{"label", "kind", "current", "options"}]
+    a plain title that names more than one movie/show, with each option's ready-to-save
+    entry and which one plays now (needs `id_index`),
+      report["healed"]  = [{"entry", "kind", "title", "year", "ids"}]
+    a saved entry whose main id went stale but was found again through a spare id
+    (`entry` is the entry as saved, `ids`/`year`/`title` are the item's current ones).
+    An entry found only by title + year plays but is not listed here, so its ids are
+    never rewritten from a title match (see apply_healed).
     """
     plex_sections = plex_sections or []
     collection_cache = collection_cache if collection_cache is not None else {}
@@ -823,10 +953,51 @@ def resolve_content(content_list, movie_map, show_map,
     expanded_titles = []
     matched_items = []
     missing = []
+
+    def _miss(label, why):
+        missing.append(label)
+        if report is not None:
+            report.setdefault("missing", []).append({"label": label, "why": why})
+
+    flagged = set()
+
+    def _flag_ambiguous(title, kind):
+        """A plain title (or a typed one without numbers) that names more than one thing
+        is played as ONE of them, chosen arbitrarily — so say so, and let the person pick."""
+        if report is None or id_index is None:
+            return
+        key = (title.lower().strip(), kind)
+        if key in flagged:
+            return
+        flagged.add(key)
+        found = _find_ambiguity(title, kind, movie_map, show_map, id_index)
+        if found:
+            report.setdefault("ambiguous", []).append(found)
+
     for entry in content_list:
         if isinstance(entry, dict) and ("movie" in entry or "show" in entry):
             kind = "movie" if "movie" in entry else "show"
-            expanded_titles.append((entry[kind], kind))  # resolved in order below
+            if entry.get("ids") and id_index is not None:
+                item, status, _ids = resolve_by_ids(kind, entry["ids"], entry[kind], entry.get("year"), id_index)
+                if item is not None:
+                    expanded_titles.append(_Resolved(item))  # keeps its place in the order
+                    if status == "healed":
+                        print(f"    Note: '{entry[kind]}' was found again through a backup number")
+                        # Only an entry a spare id CONFIRMED is offered for write-back.
+                        # A title + year match still plays, but its saved ids are never
+                        # rewritten from it — refreshing ids must not rest on a guess.
+                        if report is not None and _confirmed_by_id(entry["ids"], item):
+                            report.setdefault("healed", []).append({
+                                "entry": dict(entry), "kind": kind, "title": item["title"],
+                                "year": item.get("year"), "ids": dict(item["ids"])})
+                else:
+                    why = "matches more than one item" if status == "ambiguous" else "was not found"
+                    print(f"    WARNING: '{entry[kind]}' {why} (by its saved numbers, or by title + year)")
+                    _miss(entry[kind], "matches more than one item — open the channel and pick which"
+                          if status == "ambiguous" else "not found in your library")
+            else:
+                _flag_ambiguous(entry[kind], kind)
+                expanded_titles.append((entry[kind], kind))  # resolved in order below
         elif isinstance(entry, dict) and "collection" in entry:
             col_name = entry["collection"]
             col_members = resolve_collection_members(plex_url, plex_token, col_name, plex_sections, collection_cache)
@@ -835,7 +1006,7 @@ def resolve_content(content_list, movie_map, show_map,
                 print(f"    Collection '{col_name}': {len(col_members)} titles")
             else:
                 print(f"    WARNING: Collection '{col_name}' not found in Plex")
-                missing.append(f"[collection:{col_name}]")
+                _miss(f"[collection:{col_name}]", "collection not found in Plex")
         elif isinstance(entry, dict) and "match" in entry:
             if entry["match"] == "franchise" and entry.get("name"):
                 fr_name = entry["name"]
@@ -846,7 +1017,7 @@ def resolve_content(content_list, movie_map, show_map,
                     print(f"    Franchise '{fr_name}': {len(items)} titles")
                 else:
                     print(f"    WARNING: franchise '{fr_name}' matched nothing (cache missing or no library members)")
-                    missing.append(f"[franchise:{fr_name}]")
+                    _miss(f"[franchise:{fr_name}]", "franchise matched nothing in your library")
             elif entry["match"] == "title_contains" and entry.get("value"):
                 value = entry["value"]
                 items, _ = match_titles(value, movie_map, show_map,
@@ -856,16 +1027,21 @@ def resolve_content(content_list, movie_map, show_map,
                     print(f"    Match '{value}': {len(items)} titles")
                 else:
                     print(f"    WARNING: match '{value}' matched nothing in library")
-                    missing.append(f"[match:{value}]")
+                    _miss(f"[match:{value}]", "matched nothing in your library")
             else:
                 value = entry.get("value", "")
                 print(f"    WARNING: unsupported match ref: {entry}")
-                missing.append(f"[match:{value or entry.get('match')}]")
+                _miss(f"[match:{value or entry.get('match')}]", "unsupported reference")
         else:
+            if isinstance(entry, str):
+                _flag_ambiguous(entry, None)
             expanded_titles.append(entry)
 
     resolved = []
     for entry in expanded_titles:
+        if isinstance(entry, _Resolved):
+            resolved.append(dict(entry))
+            continue
         if isinstance(entry, dict):  # a Plex collection member
             title = entry["title"]
             item = _resolve_collection_member(entry, movie_map, show_map, id_index)
@@ -875,7 +1051,7 @@ def resolve_content(content_list, movie_map, show_map,
         if item:
             resolved.append(item)
         else:
-            missing.append(title)
+            _miss(title, "not found in your library")
 
     resolved.extend(matched_items)
     return resolved, missing

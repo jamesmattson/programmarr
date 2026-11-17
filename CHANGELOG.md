@@ -6,6 +6,14 @@ All notable changes to Programmarr are documented here. This project follows
 
 ## [Unreleased]
 
+### Added
+
+- **Channel entries can pin the exact item** (#40). An entry can now carry the item's own
+  ids and year — `{"movie": "Aladdin", "year": 2019, "ids": {"tmdb": "…", "plex": "…",
+  "tunarr": "…"}}` — so two things that share a title (the 1992 and 2019 *Aladdin*) can't be
+  mixed up. If the first id goes stale (e.g. after a Plex re-match) a spare id still finds it;
+  nothing is ever guessed. Plain titles and older entries resolve exactly as before.
+
 ### Fixed
 
 - **Plex collection members are matched by Plex id, not by title** (#40). A channel built

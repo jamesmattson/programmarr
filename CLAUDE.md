@@ -246,7 +246,24 @@ match Plex names exactly (case-insensitive). A title may appear on multiple chan
 intentional. A title that exists as **both a movie and a show** resolves to whichever has
 more playable programs (a series beats a lone film) — pin it with a typed ref
 `{"movie": "Title"}` / `{"show": "Title"}` (editor syntax `{movie: Title}`). `/pipeline/compose`
-emits typed refs automatically for exactly those colliding titles (#39). Live channels add one more content-ref type (`{"match": "title_contains", …}`),
+emits typed refs automatically for exactly those colliding titles (#39).
+
+**Pinned entries (ids).** A typed ref may also carry the item's own ids and year, which find
+that exact item even when two things share a title (the two *Aladdin*s):
+`{"movie": "Aladdin", "year": 2019, "ids": {"tmdb": "...", "plex": "...", "tunarr": "..."}}`
+(`plex` is `"<mediaSourceId>:<ratingKey>"`). Written by the Channels editor's Add box and year
+buttons (`channel_engine.entry_for_item`); the Planner still writes plain titles. Resolved via
+`resolve_by_ids` (see `channel_engine.py`); an entry that matches nothing, or more than one
+item, is skipped and reported — never guessed — and never drops its neighbours. Without the id
+index the kind and title are used, so older readers see a plain typed ref. When Apply finds an
+entry through a **spare id** (its first id went stale, e.g. after a Plex re-match), it writes the
+item's current ids back into `channels.json` (`apply_healed`); an entry found only by title +
+year still plays but is never rewritten. `resolve_content(report=…)` records skipped items with
+a reason, those healed entries, and every plain title that names more than one item
+(`report["ambiguous"]`, each option with its pinning entry); `summarize_report` shapes it for a
+screen. Flagging never changes what plays.
+
+Live channels add one more content-ref type (`{"match": "title_contains", …}`),
 documented under Live Channels.
 
 **Write-only-on-deploy invariant.** `channels.json` is the record of **deployed channels**
