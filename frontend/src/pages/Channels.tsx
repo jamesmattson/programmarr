@@ -10,7 +10,7 @@ import {
 } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { api, Channel, ChannelSyncState, ContentItem, FillerList, FranchiseRef, isMatchRef, RecipeMatch, TunarrChannel } from '../api/client';
+import { api, Channel, ChannelSyncState, ContentItem, FillerList, FranchiseRef, isMatchRef, LibraryMatch, RecipeMatch, TunarrChannel } from '../api/client';
 
 function syncedAgo(iso?: string): string {
   if (!iso) return 'never';
@@ -161,6 +161,23 @@ function FranchiseBuilder({
 
 // ── Channel editor modal ───────────────────────────────────────────────────────
 
+// One row per saved entry. `raw` is the exact saved entry for anything that carries more
+// than its text (a pinned item's ids, a collection), so editing and saving can never erase
+// it. Rows typed into the box have no raw and are parsed on save, as before.
+type ContentRow = { label: string; raw: ContentItem | null };
+
+function rowFromEntry(c: ContentItem): ContentRow {
+  if (typeof c === 'string') return { label: c, raw: null };
+  const o = c as unknown as Record<string, unknown>;
+  const [k, v] = Object.entries(o)[0];
+  const shownYear = o.ids && o.year ? ` (${o.year})` : '';
+  return { label: `{${k}: ${v}${shownYear}}`, raw: c };
+}
+
+function isPinned(row: ContentRow): boolean {
+  return row.raw !== null && typeof row.raw === 'object' && 'ids' in row.raw;
+}
+
 function ChannelModal({
   channel,
   opened,
@@ -175,8 +192,10 @@ function ChannelModal({
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
   const [shuffle, setShuffle] = useState<string>('shuffle');
-  const [content, setContent] = useState<string[]>([]);
+  const [content, setContent] = useState<ContentRow[]>([]);
   const [newItem, setNewItem] = useState('');
+  const [looking, setLooking] = useState(false);
+  const [choices, setChoices] = useState<{ text: string; matches: LibraryMatch[] } | null>(null);
   const [live, setLive] = useState(false);
   const [matchRef, setMatchRef] = useState<MatchRule | null>(null);
   const [franchiseRefs, setFranchiseRefs] = useState<FranchiseRef[]>([]);
@@ -224,21 +243,44 @@ function ChannelModal({
     const mref = channel.content.find(isMatchRef);
     setMatchRef(mref ? { value: mref.value, order: mref.order || 'release_date', exclude: mref.exclude || [] } : null);
     setFranchiseRefs(channel.content.filter(isFranchiseRef));
+    setChoices(null);
     setContent(
       channel.content
         .filter((c) => !isMatchRef(c) && !isFranchiseRef(c))
-        .map((c) => {
-          if (typeof c === 'string') return c;
-          const [k, v] = Object.entries(c as Record<string, string>)[0];
-          return `{${k}: ${v}}`;
-        })
+        .map(rowFromEntry)
     );
   }, [channel]);
 
-  function addItem() {
-    if (!newItem.trim()) return;
-    setContent((c) => [...c, newItem.trim()]);
+  function pushRow(row: ContentRow) {
+    setContent((c) => [...c, row]);
     setNewItem('');
+    setChoices(null);
+  }
+
+  // Look the title up in the library first, so what gets saved is the exact item:
+  //   one match  -> saved with the item's own numbers;
+  //   several    -> ask which one (the two Aladdins);
+  //   none       -> added as typed, exactly like before.
+  async function addItem() {
+    const text = newItem.trim();
+    if (!text || looking) return;
+    const typed = text.match(/^\{(collection|movie|show):\s*(.+)\}$/);
+    // A collection stays a live reference — never frozen into whatever it holds today.
+    if (typed && typed[1] === 'collection') return pushRow({ label: text, raw: null });
+    const kind = typed ? (typed[1] as 'movie' | 'show') : undefined;
+    const title = typed ? typed[2].trim() : text;
+    setLooking(true);
+    try {
+      const { matches } = await api.lookupLibrary(title, kind);
+      if (matches.length === 1) return pushRow(rowFromEntry(matches[0].entry));
+      if (matches.length > 1) return setChoices({ text, matches });
+      notifications.show({ color: 'yellow', message: `"${title}" isn't in your Tunarr library — added as typed.` });
+    } catch {
+      // Tunarr unreachable or not configured: keep the old behaviour instead of blocking the add.
+    } finally {
+      setLooking(false);
+    }
+    pushRow({ label: text, raw: null });
   }
 
   function removeItem(i: number) {
@@ -246,9 +288,10 @@ function ChannelModal({
   }
 
   async function persist() {
-    const rawContent: ContentItem[] = content.map((c) => {
-      const m = c.match(/^\{(collection|movie|show):\s*(.+)\}$/);
-      return m ? ({ [m[1]]: m[2].trim() } as ContentItem) : c;
+    const rawContent: ContentItem[] = content.map((r) => {
+      if (r.raw) return r.raw;
+      const m = r.label.match(/^\{(collection|movie|show):\s*(.+)\}$/);
+      return m ? ({ [m[1]]: m[2].trim() } as ContentItem) : r.label;
     });
     if (matchRef) {
       rawContent.push({
@@ -345,10 +388,11 @@ function ChannelModal({
         <Divider label="Content" labelPosition="left" />
 
         <Stack gap={4}>
-          {content.map((item, i) => (
+          {content.map((row, i) => (
             <Group key={i} gap="xs" wrap="nowrap">
               <Text size="sm" style={{ flex: 1, fontFamily: 'ui-monospace, monospace' }} truncate>
-                {item}
+                {row.label}
+                {isPinned(row) && <Text span c="dimmed" size="xs"> · pinned</Text>}
               </Text>
               <ActionIcon size="sm" color="red" variant="subtle" onClick={() => removeItem(i)}>
                 <IconX size={14} />
@@ -374,10 +418,30 @@ function ChannelModal({
             style={{ flex: 1 }}
             size="sm"
           />
-          <Button size="sm" variant="light" color="orange" onClick={addItem} leftSection={<IconPlus size={14} />}>
+          <Button size="sm" variant="light" color="orange" onClick={addItem} loading={looking}
+            leftSection={<IconPlus size={14} />}>
             Add
           </Button>
         </Group>
+
+        {choices && (
+          <Card withBorder p="xs" style={{ background: 'var(--surface-panel)' }}>
+            <Text size="xs" fw={600} mb={4}>
+              "{choices.text}" matches {choices.matches.length} items in your library — which one?
+            </Text>
+            <Stack gap={4}>
+              {choices.matches.map((m, i) => (
+                <Button key={i} size="compact-sm" variant="light" color="orange" justify="flex-start"
+                  onClick={() => pushRow(rowFromEntry(m.entry))}>
+                  {m.title}{m.year ? ` (${m.year})` : ''} — {m.kind}
+                </Button>
+              ))}
+              <Button size="compact-xs" variant="subtle" color="gray" onClick={() => setChoices(null)}>
+                Cancel
+              </Button>
+            </Stack>
+          </Card>
+        )}
 
         <Divider label="Live recipe" labelPosition="left" />
 

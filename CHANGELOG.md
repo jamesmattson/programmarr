@@ -23,6 +23,10 @@ All notable changes to Programmarr are documented here. This project follows
 - **Save and Apply refreshes a stale id** when a spare id confirms it is the same item, so the
   entry matches on its first id again. An entry found only by title and year is never
   rewritten.
+- **The Channels editor's Add box pins the exact item.** Adding a title looks it up in the
+  library first: one match is saved with its ids, several (the two *Aladdin*s) show a picker,
+  and none is added as typed, as before. `{collection: …}` is never looked up. Editing and
+  saving a channel no longer drops the extra keys on an entry; pinned rows show "· pinned".
 
 ### Fixed
 

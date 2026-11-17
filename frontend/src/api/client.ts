@@ -48,6 +48,10 @@ export const api = {
       body: JSON.stringify(body),
     }),
   getLibraryTitles: () => req<string[]>('/library/titles'),
+  // Every movie/show with exactly this title, each with a ready-to-save entry.
+  lookupLibrary: (title: string, kind?: 'movie' | 'show') =>
+    req<{ matches: LibraryMatch[] }>(
+      `/library/lookup?title=${encodeURIComponent(title)}${kind ? `&kind=${kind}` : ''}`),
 
   getCsvInfo: () => req<CsvInfo>('/pipeline/csv/info'),
   getFacets: (minItems = 5) => req<LibraryFacets>(`/pipeline/facets?min_items=${minItems}`),
@@ -193,6 +197,7 @@ export interface GuideChannel { number: number; name: string; icon?: string | nu
 export interface GuideProgramme { number: number; start: string; stop: string; title: string; episode?: string }
 export interface Guide { channels: GuideChannel[]; programmes: GuideProgramme[]; error?: string }
 export interface FillerList { id: string; name: string; contentCount: number }
+export interface LibraryMatch { kind: 'movie' | 'show'; title: string; year: number | null; entry: MovieRef | ShowRef }
 // Commercials: a channel can pull from a Tunarr filler list, played in gaps
 // between shows (pad_minutes controls the gap size). Absent = commercials off.
 export interface Commercials { filler_list_id: string; filler_list_name?: string; pad_minutes?: number }
@@ -200,7 +205,12 @@ export interface PlaybackSetting { structure: 'interleaved' | 'timeline'; episod
 export interface MatchRef { match: 'title_contains'; value: string; order?: string | null; exclude?: string[] }
 export interface FranchiseRef { match: 'franchise'; name: string; order?: string | null; exclude?: string[] }
 // { movie } / { show }: a title pinned to one media type (a movie and a show can share a title).
-export type ContentItem = string | { collection: string } | { movie: string } | { show: string } | MatchRef | FranchiseRef;
+// Saved from the Add box they also carry the item's own numbers (`ids`) and `year`, which
+// find that exact item even when two things share a title (the two Aladdins).
+export interface ItemNumbers { year?: number; ids?: Record<string, string> }
+export type MovieRef = { movie: string } & ItemNumbers;
+export type ShowRef = { show: string } & ItemNumbers;
+export type ContentItem = string | { collection: string } | MovieRef | ShowRef | MatchRef | FranchiseRef;
 export function isMatchRef(c: ContentItem): c is MatchRef {
   return typeof c === 'object' && c !== null && 'match' in c;
 }
