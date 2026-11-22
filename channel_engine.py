@@ -111,6 +111,28 @@ def api(tunarr_url, method, path, body=None, timeout=60):
         return None
 
 
+def get_library_programs(tunarr_url, lib_id, timeout=120):
+    """All programs in a Tunarr library. Handles both response shapes: a bare list
+    (Tunarr before 2026.11) and the paged {total, result} wrapper (Tunarr #2423).
+    Returns None on any failure — never a partial library, which would deploy
+    half-empty channels — so callers keep their failed-library handling."""
+    path = f"/api/media-libraries/{lib_id}/programs"
+    first = api(tunarr_url, "GET", path, timeout=timeout)
+    if first is None or isinstance(first, list):
+        return first
+    programs = list(first.get("result") or [])
+    total = first.get("total", len(programs))
+    while len(programs) < total:
+        page = api(tunarr_url, "GET", f"{path}?offset={len(programs)}&limit=1000", timeout=timeout)
+        if page is None:
+            return None
+        batch = page.get("result") or []
+        if not batch:
+            break
+        programs.extend(batch)
+    return programs
+
+
 # ── Library indexing ───────────────────────────────────────────────────────────
 
 def get_transcode_config(tunarr_url):
@@ -248,7 +270,7 @@ def build_library_index(tunarr_url):
         if movie_libs:
             print(f"  Indexing movies ({source_name})...")
             for lib in movie_libs:
-                programs = api(tunarr_url, "GET", f"/api/media-libraries/{lib['id']}/programs", timeout=120)
+                programs = get_library_programs(tunarr_url, lib["id"])
                 if programs is None:
                     failed_libs.append(f"{source_name}/{lib.get('name', lib['id'])}")
                     continue
@@ -263,7 +285,7 @@ def build_library_index(tunarr_url):
         if tv_libs:
             print(f"  Indexing TV shows ({source_name})...")
             for lib in tv_libs:
-                programs = api(tunarr_url, "GET", f"/api/media-libraries/{lib['id']}/programs", timeout=120)
+                programs = get_library_programs(tunarr_url, lib["id"])
                 if programs is None:
                     failed_libs.append(f"{source_name}/{lib.get('name', lib['id'])}")
                     continue

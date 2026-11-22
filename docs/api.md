@@ -73,7 +73,7 @@ scheduler reuses.
 ## Tunarr API Endpoints Used
 
 - `GET /api/media-sources` — discover Plex source and library IDs
-- `GET /api/media-libraries/{id}/programs` — all episodes/movies in a library
+- `GET /api/media-libraries/{id}/programs` — all episodes/movies in a library (paged since Tunarr 2026.11; read via `channel_engine.get_library_programs`)
 - `GET /api/transcode_configs` — fetch transcode config ID at runtime
 - `GET /api/channels` — list existing channels
 - `POST /api/channels` — create channel

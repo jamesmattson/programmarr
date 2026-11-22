@@ -17,7 +17,7 @@ is directly observable and a minimum-version guess isn't.
 |---|---|---|---|
 | GET | `/api/version` | Diagnostics; shown in the UI and asked for in bug reports | `tunarr` |
 | GET | `/api/media-sources` | Find Plex sources and their libraries | `type`, `name`, `uri`, `libraries[].id`, `libraries[].name`, `libraries[].mediaType`, `libraries[].enabled` |
-| GET | `/api/media-libraries/{id}/programs` | Index the whole library — the core read | `id`, `program.title`, `program.show.uuid`, `program.show.title`, `program.showId`, `program.state`, `program.releaseDate` |
+| GET | `/api/media-libraries/{id}/programs` | Index the whole library — the core read. Paged (`{total, result}`, max 1000/page) since Tunarr #2423 (2026.11); `channel_engine.get_library_programs` reads every page and still accepts the old bare list | `id`, `program.title`, `program.show.uuid`, `program.show.title`, `program.showId`, `program.state`, `program.releaseDate` |
 | GET | `/api/transcode_configs` | Pick a transcode config when creating channels | `id`, `name` |
 | GET | `/api/channels` | List channels; look up by number | `id`, `number`, `name` |
 | GET | `/api/channels/{id}` | Read a full channel to edit its icon | whole object (round-tripped) |

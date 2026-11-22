@@ -133,13 +133,13 @@ def build_tunarr_title_sets(tunarr_url):
         tv_libs    = [l for l in libs if l.get("mediaType") == "shows" and l.get("enabled")]
 
         for lib in movie_libs:
-            programs = tunarr_get(tunarr_url, f"/api/media-libraries/{lib['id']}/programs", timeout=120) or []
+            programs = channel_engine.get_library_programs(tunarr_url, lib["id"]) or []
             titles   = {p.get("program", {}).get("title", "").lower().strip() for p in programs}
             movie_titles |= titles
             print(f"  Tunarr has {len(titles)} movies ({lib.get('name', lib['id'])})")
 
         for lib in tv_libs:
-            programs = tunarr_get(tunarr_url, f"/api/media-libraries/{lib['id']}/programs", timeout=120) or []
+            programs = channel_engine.get_library_programs(tunarr_url, lib["id"]) or []
             titles   = {p.get("program", {}).get("show", {}).get("title", "").lower().strip()
                         for p in programs if p.get("program", {}).get("show")}
             tv_titles |= titles
@@ -224,7 +224,7 @@ def build_extra_rows_from_tunarr(tunarr_url, seen_movie_titles, seen_show_titles
         for lib in movie_libs:
             if allowed_movie_libs is not None and lib["id"] not in allowed_movie_libs:
                 continue
-            programs = tunarr_get(tunarr_url, f"/api/media-libraries/{lib['id']}/programs", timeout=120) or []
+            programs = channel_engine.get_library_programs(tunarr_url, lib["id"]) or []
             for p in programs:
                 prog = p.get("program", {})
                 title = prog.get("title", "")
@@ -236,7 +236,7 @@ def build_extra_rows_from_tunarr(tunarr_url, seen_movie_titles, seen_show_titles
         for lib in show_libs:
             if allowed_tv_libs is not None and lib["id"] not in allowed_tv_libs:
                 continue
-            programs = tunarr_get(tunarr_url, f"/api/media-libraries/{lib['id']}/programs", timeout=120) or []
+            programs = channel_engine.get_library_programs(tunarr_url, lib["id"]) or []
             shows: dict = {}
             for p in programs:
                 prog = p.get("program", {})
