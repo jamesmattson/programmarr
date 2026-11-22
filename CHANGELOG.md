@@ -6,6 +6,10 @@ All notable changes to Programmarr are documented here. This project follows
 
 ## [Unreleased]
 
+## [0.9.0] — 2026-11-22
+
+Id-based matching, contributed by @Fatman032 (#42).
+
 ### Added
 
 - **Channel entries can pin the exact item** (#40). An entry can now carry the item's own
