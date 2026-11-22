@@ -4,6 +4,16 @@ All notable changes to Programmarr are documented here. This project follows
 [Semantic Versioning](https://semver.org/) and the spirit of
 [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.8.2] — 2026-11-21
+
+### Fixed
+
+- **Deploy and export work again on Tunarr 2026.11+** (#43). Tunarr 2026.11 changed its
+  library programs endpoint to return results in pages, and Build Channels crashed with
+  `AttributeError: 'str' object has no attribute 'get'`. Programmarr now reads every page,
+  still works with older Tunarr versions, and treats a failed page as a failed library
+  instead of deploying channels from a partial library.
+
 ## [0.8.1] — 2026-09-10
 
 ### Fixed
