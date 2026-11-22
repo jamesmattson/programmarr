@@ -48,6 +48,12 @@ export const api = {
       body: JSON.stringify(body),
     }),
   getLibraryTitles: () => req<string[]>('/library/titles'),
+  // Every movie/show with exactly this title, each with a ready-to-save entry.
+  lookupLibrary: (title: string, kind?: 'movie' | 'show') =>
+    req<{ matches: LibraryMatch[] }>(
+      `/library/lookup?title=${encodeURIComponent(title)}${kind ? `&kind=${kind}` : ''}`),
+  // Check one channel against the library right now (skipped items, spare-id finds, ambiguous titles).
+  getChannelReview: (n: number) => req<ChannelReview>(`/channels/${n}/review`),
 
   getCsvInfo: () => req<CsvInfo>('/pipeline/csv/info'),
   getFacets: (minItems = 5) => req<LibraryFacets>(`/pipeline/facets?min_items=${minItems}`),
@@ -193,6 +199,7 @@ export interface GuideChannel { number: number; name: string; icon?: string | nu
 export interface GuideProgramme { number: number; start: string; stop: string; title: string; episode?: string }
 export interface Guide { channels: GuideChannel[]; programmes: GuideProgramme[]; error?: string }
 export interface FillerList { id: string; name: string; contentCount: number }
+export interface LibraryMatch { kind: 'movie' | 'show'; title: string; year: number | null; entry: MovieRef | ShowRef }
 // Commercials: a channel can pull from a Tunarr filler list, played in gaps
 // between shows (pad_minutes controls the gap size). Absent = commercials off.
 export interface Commercials { filler_list_id: string; filler_list_name?: string; pad_minutes?: number }
@@ -200,7 +207,12 @@ export interface PlaybackSetting { structure: 'interleaved' | 'timeline'; episod
 export interface MatchRef { match: 'title_contains'; value: string; order?: string | null; exclude?: string[] }
 export interface FranchiseRef { match: 'franchise'; name: string; order?: string | null; exclude?: string[] }
 // { movie } / { show }: a title pinned to one media type (a movie and a show can share a title).
-export type ContentItem = string | { collection: string } | { movie: string } | { show: string } | MatchRef | FranchiseRef;
+// Saved from the Add box they also carry the item's own numbers (`ids`) and `year`, which
+// find that exact item even when two things share a title (the two Aladdins).
+export interface ItemNumbers { year?: number; ids?: Record<string, string> }
+export type MovieRef = { movie: string } & ItemNumbers;
+export type ShowRef = { show: string } & ItemNumbers;
+export type ContentItem = string | { collection: string } | MovieRef | ShowRef | MatchRef | FranchiseRef;
 export function isMatchRef(c: ContentItem): c is MatchRef {
   return typeof c === 'object' && c !== null && 'match' in c;
 }
@@ -227,6 +239,22 @@ export interface CycleSkip { number: number; name: string; reason: string }
 export interface CycleSummary {
   time: string; apply: boolean; live: number; changed: number;
   changes: CycleChange[]; skipped: CycleSkip[]; error: string | null;
+}
+// A plain title that names more than one movie/show: the options (each with the entry that
+// pins it) and which one the channel plays right now.
+export interface AmbiguousChoice {
+  label: string;
+  kind: 'movie' | 'show' | null;
+  current: number | null;
+  options: { kind: 'movie' | 'show'; title: string; year: number | null; entry: MovieRef | ShowRef }[];
+}
+// A live check of one channel against the library (nothing is written or deployed).
+export interface ChannelReview {
+  missing_count: number;
+  missing: { label: string; why: string }[];   // capped for display; missing_count is the true total
+  healed_count: number;
+  ambiguous_count: number;
+  ambiguous: AmbiguousChoice[];
 }
 export interface ChannelSyncState { checked_at?: string; changed_at?: string; change_summary?: string }
 export interface RecipesStatus {
