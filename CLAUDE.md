@@ -110,7 +110,7 @@ Each test seeds a temp `DATA_DIR` with a synthetic `plex_library.csv` (the `seed
 `validate(append=True)`, `discover_prompt`, and `generate_no_ai`.
 
 **Environments:** **localhost:7979** = local Docker before pushing. **TrueNAS** = production,
-runs `ghcr.io/alpinearchitecture/programmarr:latest` with Watchtower (`:latest` moves only when
+runs `ghcr.io/jamesmattson/programmarr:latest` with Watchtower (`:latest` moves only when
 a GitHub Release is cut — not on a master push; Watchtower picks it up shortly after).
 
 **Demo dataset:** `python scripts/make_demo_data.py` (re)generates the committed `demo/` dir
@@ -469,7 +469,7 @@ authoring UI and status cards), full rationale, rejected alternatives, and histo
 
 ## Issues
 
-Tracked in GitHub Issues (`AlpineArchitecture/programmarr`) via the `gh` CLI. Label
+Tracked in GitHub Issues (`jamesmattson/programmarr`) via the `gh` CLI. Label
 vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`.
 Bug reports come in through `.github/ISSUE_TEMPLATE/`, which requires the Programmarr and
 Tunarr versions and the media-source type — the three fields that explain most reports.

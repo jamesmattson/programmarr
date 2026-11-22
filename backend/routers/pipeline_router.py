@@ -927,7 +927,7 @@ def tvmaze_scan_status():
 
 _WIKIDATA_SPARQL_URL = "https://query.wikidata.org/sparql"
 _WIKIDATA_USER_AGENT = (
-    "Programmarr/1.0 (https://github.com/alpinearchitecture/programmarr; "
+    "Programmarr/1.0 (https://github.com/jamesmattson/programmarr; "
     "franchise enrichment; contact via GitHub issues)"
 )
 # Wikidata SPARQL batch size: send at most this many VALUES per query to avoid

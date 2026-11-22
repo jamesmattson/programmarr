@@ -1,6 +1,6 @@
 services:
   programmarr:
-    image: ghcr.io/alpinearchitecture/programmarr:latest
+    image: ghcr.io/jamesmattson/programmarr:latest
     container_name: programmarr
     restart: unless-stopped
     ports:

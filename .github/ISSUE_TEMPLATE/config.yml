@@ -1,7 +1,7 @@
 blank_issues_enabled: true
 contact_links:
   - name: Question or setup help
-    url: https://github.com/AlpineArchitecture/programmarr/discussions
+    url: https://github.com/jamesmattson/programmarr/discussions
     about: >
       For "how do I..." and setup problems, please start a Discussion rather than
       an Issue — it keeps the tracker focused on confirmed bugs.

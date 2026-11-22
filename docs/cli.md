@@ -18,7 +18,7 @@ run standalone.
 - Optionally a [TMDB API key](https://www.themoviedb.org/settings/api) for channel logos
 
 ```bash
-git clone https://github.com/AlpineArchitecture/programmarr.git
+git clone https://github.com/jamesmattson/programmarr.git
 cd programmarr
 python programmarr.py
 ```

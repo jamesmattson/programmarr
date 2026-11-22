@@ -17,7 +17,7 @@ if _ROOT not in sys.path:
 import channel_engine  # noqa: E402
 
 GITHUB_LATEST_RELEASE = (
-    "https://api.github.com/repos/AlpineArchitecture/programmarr/releases/latest"
+    "https://api.github.com/repos/jamesmattson/programmarr/releases/latest"
 )
 
 # Notifier cache: one GitHub hit per _UPDATE_TTL seconds, regardless of UI loads.

@@ -14,6 +14,14 @@ All notable changes to Programmarr are documented here. This project follows
   still works with older Tunarr versions, and treats a failed page as a failed library
   instead of deploying channels from a partial library.
 
+### Changed
+
+- **The Docker image moved to `ghcr.io/jamesmattson/programmarr`.** The GitHub account was
+  renamed, and the old `ghcr.io/alpinearchitecture/programmarr` path no longer serves
+  updates. Change the `image:` line in your `docker-compose.yml` to
+  `ghcr.io/jamesmattson/programmarr:latest`, then `docker compose pull && docker compose up -d`.
+  Your `data/` folder is untouched.
+
 ## [0.8.1] — 2026-09-10
 
 ### Fixed

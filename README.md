@@ -25,7 +25,7 @@ Channels can also be **self-maintaining**: mark one "live" and Programmarr re-ch
 > Plex-backed source in Tunarr. Jellyfin and Emby aren't supported yet — if a Tunarr has no
 > Plex source, Programmarr will tell you so rather than failing mysteriously.
 > Interested in Jellyfin support? Say so on
-> [the tracking issue](https://github.com/AlpineArchitecture/programmarr/issues/36) — demand decides priority.
+> [the tracking issue](https://github.com/jamesmattson/programmarr/issues/36) — demand decides priority.
 
 ---
 
@@ -36,7 +36,7 @@ Channels can also be **self-maintaining**: mark one "live" and Programmarr re-ch
 ```yaml
 services:
   programmarr:
-    image: ghcr.io/alpinearchitecture/programmarr:latest
+    image: ghcr.io/jamesmattson/programmarr:latest
     container_name: programmarr
     restart: unless-stopped
     ports:
@@ -51,7 +51,7 @@ services:
 docker compose up -d
 ```
 
-That's it — the image is pre-built on [GHCR](https://github.com/AlpineArchitecture/programmarr/pkgs/container/programmarr). No local build step needed, and nothing to clone.
+That's it — the image is pre-built on [GHCR](https://github.com/jamesmattson/programmarr/pkgs/container/programmarr). No local build step needed, and nothing to clone.
 
 ### 3. Open the UI
 
@@ -74,7 +74,7 @@ Paste this as a complete compose file in Apps → Custom App:
 ```yaml
 services:
   programmarr:
-    image: ghcr.io/alpinearchitecture/programmarr:latest
+    image: ghcr.io/jamesmattson/programmarr:latest
     container_name: programmarr
     restart: unless-stopped
     ports:
@@ -115,7 +115,7 @@ will only ever pull released versions — never work-in-progress.
 ```yaml
 services:
   programmarr:
-    image: ghcr.io/alpinearchitecture/programmarr:latest
+    image: ghcr.io/jamesmattson/programmarr:latest
     container_name: programmarr
     restart: unless-stopped
     ports:
@@ -249,7 +249,7 @@ gunzip -c data/tunarr_backup_20260819T195358Z.json.gz > lineup.json
 
 Each entry has the original `channel` object (including its Tunarr `id`) and the raw
 `programming` payload. If you ever need to recover a lineup, open an
-[issue](https://github.com/AlpineArchitecture/programmarr/issues) with that file's structure
+[issue](https://github.com/jamesmattson/programmarr/issues) with that file's structure
 and I'll help — and if it happens to anyone, a proper restore command moves to the top of the list.
 
 ---
@@ -309,4 +309,4 @@ scripts directly (cron-friendly), and editing `config.json` by hand for advanced
 
 Built with [Claude Code](https://claude.ai/claude-code). Made possible by [Tunarr](https://github.com/chrisbenincasa/tunarr), [Plex](https://www.plex.tv/), [TMDB](https://www.themoviedb.org/), and [Kometa](https://kometa.wiki/).
 
-[⭐ Star on GitHub](https://github.com/AlpineArchitecture/programmarr) · [🐛 Report a Bug](https://github.com/AlpineArchitecture/programmarr/issues)
+[⭐ Star on GitHub](https://github.com/jamesmattson/programmarr) · [🐛 Report a Bug](https://github.com/jamesmattson/programmarr/issues)
