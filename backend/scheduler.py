@@ -125,9 +125,13 @@ def _id_label_map(movie_map: dict, show_map: dict) -> dict:
 
 
 def _summarize(ids: set, id_label: dict) -> list:
-    """Render a set of program ids as ['Title', 'Show x8'] (dedup + counts)."""
+    """Render a set of program ids as ['Show x8', 'Title'] (dedup + counts).
+
+    Most-common first, ties by title: `ids` is a set, so tie order would otherwise
+    follow the hash seed and change on every restart (#45)."""
     counts = Counter(id_label.get(i, "(unknown)") for i in ids)
-    return [lbl + (f" x{n}" if n > 1 else "") for lbl, n in counts.most_common()]
+    return [lbl + (f" x{n}" if n > 1 else "")
+            for lbl, n in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))]
 
 
 # ── The cycle ──────────────────────────────────────────────────────────────────

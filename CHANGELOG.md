@@ -6,6 +6,12 @@ All notable changes to Programmarr are documented here. This project follows
 
 ## [Unreleased]
 
+### Fixed
+
+- **Live-channel change summaries list titles in a stable order** (#45). Titles with the
+  same count were listed in a different order after each restart (it followed Python's
+  hash seed); ties are now sorted by title.
+
 ## [0.9.1] — 2026-11-23
 
 ### Security

@@ -88,3 +88,15 @@ def test_no_expected_name_keeps_legacy_behavior(fake_tunarr):
     channel_engine.update_channel_in_place("http://t", 7, "ordered", RESOLVED)
 
     assert fake_tunarr.programmed is not None
+
+
+def test_summary_order_is_stable_across_hash_seeds():
+    """#45: ties must sort by title, not by the set's (hash-seed) order."""
+    import subprocess, sys
+    code = ("import sys; sys.path[:0]=['backend','.']; import scheduler; "
+            "print(scheduler._summarize({'a','b','c','d','e'}, "
+            "{'a':'Zulu','b':'Alpha','c':'Mike','d':'Show','e':'Show'}))")
+    outs = {subprocess.run([sys.executable, "-c", code], capture_output=True, text=True,
+                           env={**__import__('os').environ, "PYTHONHASHSEED": str(s)}).stdout
+            for s in range(6)}
+    assert outs == {"['Show x2', 'Alpha', 'Mike', 'Zulu']\n"}
