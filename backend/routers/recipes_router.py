@@ -122,8 +122,8 @@ def set_recipe_config(req: RecipeConfigRequest):
     cfg["recipes_enabled"] = req.enabled
     cfg["recipe_interval_hours"] = req.interval_hours
     try:
-        with open(DATA_DIR / "config.json", "w") as f:
-            json.dump(cfg, f, indent=4)
+        from routers.config_router import write_config
+        write_config(cfg, DATA_DIR / "config.json")
     except Exception as e:
         raise HTTPException(500, f"Could not save config: {e}")
     return scheduler.get_status()

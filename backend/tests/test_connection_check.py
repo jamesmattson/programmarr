@@ -136,7 +136,7 @@ def test_locked_down_plex_does_verify_the_token(monkeypatch):
     """When Plex actually enforces the token, a successful call means something —
     no caveat should be attached."""
     def _f(req, timeout=None):
-        if "X-Plex-Token" not in req.full_url:
+        if not req.get_header("X-plex-token"):  # token travels as a header, not in the URL
             raise http_error(401)
         return FakeResp(200)
     monkeypatch.setattr(sr.urllib.request, "urlopen", _f)

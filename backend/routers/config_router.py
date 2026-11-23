@@ -2,7 +2,7 @@ import json
 import os
 from pathlib import Path
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -31,6 +31,39 @@ class ConfigModel(BaseModel):
     # Whether the app polls GitHub for a newer release (the in-app update banner).
     # Default on; stored explicitly so the falsy-prune below can't drop a False.
     update_check_enabled: bool = True
+
+
+def _norm_url(u) -> str:
+    return (u or "").strip().rstrip("/")
+
+
+def saved_plex_url(cfg: dict) -> str:
+    """The primary Plex URL Settings shows (plex_servers[0] wins over legacy plex_url)."""
+    servers = cfg.get("plex_servers") or []
+    return _norm_url(servers[0].get("url") if servers else cfg.get("plex_url"))
+
+
+def saved_plex_token_for(cfg: dict, url: str) -> str:
+    """The stored token for exactly this Plex URL, or "" if no saved server has it.
+
+    SECURITY: the UI sends MASK for a secret it didn't retype, and we swap the real
+    secret back in. That swap must only ever target the server the secret belongs
+    to; otherwise anyone can point the URL at their own host and receive the token.
+    """
+    url = _norm_url(url)
+    for s in cfg.get("plex_servers") or []:
+        if _norm_url(s.get("url")) == url:
+            return s.get("token", "")
+    if _norm_url(cfg.get("plex_url")) == url:
+        return cfg.get("plex_token", "")
+    return ""
+
+
+def saved_tunarr_password_for(cfg: dict, url: str) -> str:
+    """The stored Tunarr password, only if `url` is the saved Tunarr URL (see above)."""
+    if _norm_url(url) == _norm_url(cfg.get("tunarr_url")):
+        return cfg.get("tunarr_password", "")
+    return ""
 
 
 def _path() -> Path:
@@ -68,6 +101,14 @@ def get_config():
 def save_config(config: ConfigModel):
     existing = load_config()
     data = config.model_dump()
+    # SECURITY: a masked secret is kept only while it stays pointed at its own
+    # server. Changing the URL means re-typing the secret, or the real one would
+    # be sent to whatever host the new URL names.
+    if data.get("plex_token") == MASK and _norm_url(data.get("plex_url")) != saved_plex_url(existing):
+        raise HTTPException(400, "Re-enter the Plex token to change the Plex URL.")
+    if data.get("tunarr_password") == MASK and \
+            _norm_url(data.get("tunarr_url")) != _norm_url(existing.get("tunarr_url")):
+        raise HTTPException(400, "Re-enter the Tunarr password to change the Tunarr URL.")
     for field in ("auth_password", "plex_token", "tmdb_api_key", "tunarr_password"):
         if data.get(field) == MASK:
             data[field] = existing.get(field, "")
@@ -109,16 +150,30 @@ def save_config(config: ConfigModel):
         url   = merged.get("plex_url", "")
         token = merged.get("plex_token", "")
         primary = dict(merged["plex_servers"][0])
+        if url and _norm_url(url) != _norm_url(primary.get("url")):
+            # New server: never carry the old server's token over to it.
+            primary["token"] = token
         if url:
             primary["url"] = url
         if token:
             primary["token"] = token
+        if not primary.get("token"):
+            primary.pop("token", None)
         merged["plex_servers"] = [primary] + merged["plex_servers"][1:]
     merged["update_check_enabled"] = update_check
     # Preserve old channel_blocks key silently (don't crash; just ignore it).
-    with open(_path(), "w") as f:
-        json.dump(merged, f, indent=4)
+    write_config(merged)
     return {"ok": True}
+
+
+def write_config(cfg: dict, path: Path | None = None) -> None:
+    """Atomic write: the auth middleware fails closed on an unreadable config, so a
+    request must never see a half-written file."""
+    path = path or _path()
+    tmp = path.with_suffix(".json.tmp")
+    with open(tmp, "w") as f:
+        json.dump(cfg, f, indent=4)
+    os.replace(tmp, path)
 
 
 @router.get("/config/status")

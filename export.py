@@ -336,6 +336,7 @@ def main():
     args = parser.parse_args()
 
     cfg = load_config()
+    channel_engine.set_tunarr_auth_from_config(cfg)
     tunarr_url = cfg["tunarr_url"].rstrip("/")
     plex_server_list = _get_plex_servers(cfg)
     multi = len(plex_server_list) > 1

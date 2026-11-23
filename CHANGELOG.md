@@ -6,6 +6,32 @@ All notable changes to Programmarr are documented here. This project follows
 
 ## [Unreleased]
 
+### Security
+
+Reported privately by @NateAtOrgTech. Upgrade promptly if port 7979 is reachable by anyone
+you don't fully trust, and consider rotating your Plex token and Tunarr password.
+
+- **Saved secrets can no longer be sent to another server** (critical, v0.8.0+). Settings
+  shows saved secrets as `••••••••`, and the server swapped the real secret back in even
+  when the request named a different URL, so anyone who could reach Programmarr could
+  receive your Plex token or Tunarr password. The saved secret is now used only for the
+  URL it was saved with: changing a URL means re-typing its token or password. The Plex
+  token is sent as a header in connection checks, and error messages no longer repeat
+  the URL.
+- **Other websites can no longer drive Programmarr** (high, all versions). The wildcard
+  CORS policy is removed (the web app is same-origin and never needed it), and requests
+  that change something are refused when a browser says they came from another site.
+- **Your Tunarr login is no longer sent to TMDB** (low, v0.8.0+), and TMDB API keys are
+  hidden in log lines.
+- The login check uses a constant-time comparison, and an unreadable `config.json` now
+  refuses requests instead of silently turning the login off. Config saves are atomic.
+
+### Fixed
+
+- **Export and channel art now work when Tunarr has a login** (#46). `export.py` and
+  `fetch_images.py` never applied the Tunarr credentials, so the export quietly skipped
+  its Tunarr check and the art stage couldn't set icons.
+
 ## [0.9.0] — 2026-11-22
 
 Id-based matching, contributed by @Fatman032 (#42).

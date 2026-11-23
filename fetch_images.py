@@ -29,6 +29,7 @@ import time
 import uuid
 
 import badge_renderer
+import channel_engine
 import icon_engine
 
 CONFIG_FILE = "config.json"
@@ -51,7 +52,7 @@ def load_config():
 
 def get_tunarr_channels(tunarr_url):
     """number -> full channel object for every Tunarr channel."""
-    channels = icon_engine.http_get(f"{tunarr_url}/api/channels", timeout=30) or []
+    channels = icon_engine.http_get(f"{tunarr_url}/api/channels", timeout=30, tunarr=True) or []
     by_number = {}
     for ch in channels:
         full = icon_engine.get_full_channel(tunarr_url, ch["id"])
@@ -89,6 +90,7 @@ def main():
     args = parser.parse_args()
 
     cfg = load_config()
+    channel_engine.set_tunarr_auth_from_config(cfg)
     tunarr_url = cfg["tunarr_url"].rstrip("/")
     tmdb_key = cfg.get("tmdb_api_key", "")
 

@@ -67,15 +67,18 @@ def load_config() -> dict:
         return {}
 
 
-def probe(url: str, tunarr: bool = False) -> dict:
+def probe(url: str, tunarr: bool = False, headers: dict | None = None) -> dict:
     """Reach a URL and judge whether it actually answered usefully.
 
     An HTTP error is NOT success. This used to return ok:True for any response
     including 401, which reported an auth-protected Tunarr as healthy — harmless
     before Tunarr had auth, actively misleading now that it does.
+
+    SECURITY: secrets go in `headers`, never in `url`, and error text never
+    repeats the URL — both used to leak the Plex token back to the caller.
     """
     try:
-        headers = channel_engine.tunarr_headers() if tunarr else {}
+        headers = {**(channel_engine.tunarr_headers() if tunarr else {}), **(headers or {})}
         req = urllib.request.Request(url, headers=headers)
         with urllib.request.urlopen(req, timeout=5) as r:
             return {"ok": True, "status": r.status}
@@ -85,7 +88,7 @@ def probe(url: str, tunarr: bool = False) -> dict:
                     "Settings -> Connections.") if tunarr else \
                    "Plex rejected the token."
             return {"ok": False, "status": e.code, "error": f"Authentication failed ({e.code}). {hint}"}
-        return {"ok": False, "status": e.code, "error": f"HTTP {e.code} from {url}"}
+        return {"ok": False, "status": e.code, "error": f"HTTP {e.code}"}
     except Exception as e:
         return {"ok": False, "error": str(e)}
 
@@ -118,7 +121,7 @@ def check_plex(url: str, token: str) -> dict:
         return {"ok": False, "error": "No Plex token given"}
     # /library/sections proves we can read the library, which is what Programmarr
     # actually needs — a bare / accepts any token.
-    result = {**probe(f"{url}/library/sections?X-Plex-Token={token}"), "url": url}
+    result = {**probe(f"{url}/library/sections", headers={"X-Plex-Token": token}), "url": url}
 
     if result.get("ok"):
         # Many self-hosted Plex servers have "Allow unauthenticated access on the
@@ -156,7 +159,7 @@ def get_status():
             # the issue template asks for it.
             tr["version"] = channel_engine.get_tunarr_version(tunarr)
     if plex and token:
-        pr = {**probe(f"{plex}/?X-Plex-Token={token}"), "url": plex}
+        pr = {**probe(f"{plex}/", headers={"X-Plex-Token": token}), "url": plex}
 
     return {"tunarr": tr, "plex": pr}
 
@@ -176,23 +179,31 @@ def test_connection(body: ConnectionTest):
     Tests only the sides that were supplied, so onboarding can check Tunarr and
     Plex independently as each is filled in.
     """
-    from routers.config_router import MASK
+    from routers.config_router import MASK, saved_plex_token_for, saved_tunarr_password_for
 
     cfg = load_config()
     # The Settings form sends the mask for a secret the user didn't retype — test
     # the stored value rather than literally trying to authenticate as "••••••••".
-    tunarr_pw = body.tunarr_password
-    if tunarr_pw == MASK:
-        tunarr_pw = cfg.get("tunarr_password", "")
-    plex_token = body.plex_token
-    if plex_token == MASK:
-        plex_token = cfg.get("plex_token", "")
-
+    # SECURITY: only for the URL that secret is saved against; any other URL must
+    # bring its own secret, or the stored one would be sent to the caller's host.
+    retype = "Re-enter the {} to test a different URL than the saved one."
     out = {}
     if body.tunarr_url:
-        out["tunarr"] = check_tunarr(body.tunarr_url, body.tunarr_username, tunarr_pw)
-    if body.plex_url or plex_token:
-        out["plex"] = check_plex(body.plex_url, plex_token)
+        tunarr_pw = body.tunarr_password
+        if tunarr_pw == MASK:
+            tunarr_pw = saved_tunarr_password_for(cfg, body.tunarr_url)
+        if body.tunarr_password == MASK and not tunarr_pw:
+            out["tunarr"] = {"ok": False, "error": retype.format("Tunarr password")}
+        else:
+            out["tunarr"] = check_tunarr(body.tunarr_url, body.tunarr_username, tunarr_pw)
+    if body.plex_url or body.plex_token:
+        plex_token = body.plex_token
+        if plex_token == MASK:
+            plex_token = saved_plex_token_for(cfg, body.plex_url)
+        if body.plex_token == MASK and not plex_token:
+            out["plex"] = {"ok": False, "error": retype.format("Plex token")}
+        else:
+            out["plex"] = check_plex(body.plex_url, plex_token)
     return out
 
 

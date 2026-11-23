@@ -38,18 +38,29 @@ def normalize_title(s):
 
 # ── HTTP ───────────────────────────────────────────────────────────────────────
 
-def http_get(url, timeout=15):
-    req = urllib.request.Request(url, headers=channel_engine.tunarr_headers())
+_SECRET_PARAM = re.compile(r"(api_key|X-Plex-Token)=[^&\s]+", re.IGNORECASE)
+
+
+def redact_url(url):
+    """Hide secrets carried in a query string before the URL reaches a log line."""
+    return _SECRET_PARAM.sub(r"\1=***", url)
+
+
+def http_get(url, timeout=15, tunarr=False):
+    """GET JSON. Tunarr credentials are attached ONLY when tunarr=True: this is
+    also used for TMDB, and the Tunarr login must never go to a third party."""
+    headers = channel_engine.tunarr_headers() if tunarr else {}
+    req = urllib.request.Request(url, headers=headers)
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:
             return json.loads(r.read())
     except urllib.error.HTTPError as e:
         if e.code == 404:
             return None
-        print(f"  ! HTTP {e.code}: {url}")
+        print(f"  ! HTTP {e.code}: {redact_url(url)}")
         return None
     except Exception as e:
-        print(f"  ! Error fetching {url}: {e}")
+        print(f"  ! Error fetching {redact_url(url)}: {e}")
         return None
 
 
@@ -233,7 +244,7 @@ def _tunarr_put(tunarr_url, path, body):
 def get_full_channel(tunarr_url, channel_id):
     """Full Tunarr channel object (the summary from /api/channels lacks fields
     the PUT round-trip needs)."""
-    return http_get(f"{tunarr_url}/api/channels/{channel_id}", timeout=30)
+    return http_get(f"{tunarr_url}/api/channels/{channel_id}", timeout=30, tunarr=True)
 
 
 def upload_image_to_tunarr(tunarr_url, png_bytes, filename):
