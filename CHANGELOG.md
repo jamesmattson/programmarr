@@ -6,6 +6,8 @@ All notable changes to Programmarr are documented here. This project follows
 
 ## [Unreleased]
 
+## [0.9.1] — 2026-11-23
+
 ### Security
 
 Reported privately by @NateAtOrgTech. Upgrade promptly if port 7979 is reachable by anyone
