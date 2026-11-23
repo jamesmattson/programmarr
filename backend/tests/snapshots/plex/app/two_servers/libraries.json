@@ -1,0 +1,26 @@
+[
+  {
+    "key": "plex:1",
+    "server": "Plex",
+    "title": "Movies",
+    "type": "movie"
+  },
+  {
+    "key": "plex:2",
+    "server": "Plex",
+    "title": "TV Shows",
+    "type": "show"
+  },
+  {
+    "key": "tunarr:tunarr2-lib-movies",
+    "server": "Plex 2",
+    "title": "Movies",
+    "type": "movie"
+  },
+  {
+    "key": "tunarr:tunarr2-lib-shows",
+    "server": "Plex 2",
+    "title": "TV Shows",
+    "type": "show"
+  }
+]

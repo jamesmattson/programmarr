@@ -1,0 +1,360 @@
+{
+  "channels": [
+    {
+      "content": [
+        "The Simpsons"
+      ],
+      "name": "The Simpsons 24/7",
+      "number": 10,
+      "shuffle": "ordered"
+    },
+    {
+      "content": [
+        "Cheers"
+      ],
+      "name": "Cheers 24/7",
+      "number": 11,
+      "shuffle": "ordered"
+    },
+    {
+      "content": [
+        "Frasier"
+      ],
+      "name": "Frasier 24/7",
+      "number": 12,
+      "shuffle": "ordered"
+    },
+    {
+      "content": [
+        "Friends"
+      ],
+      "name": "Friends 24/7",
+      "number": 13,
+      "shuffle": "ordered"
+    },
+    {
+      "content": [
+        "21 Jump Street",
+        "Airplane!",
+        "Anchorman",
+        "Back to the Future",
+        "Bridesmaids",
+        "Caddyshack",
+        "Coming to America",
+        "Dumb and Dumber",
+        "Finding Nemo",
+        "Galaxy Quest",
+        "Game Night",
+        "Ghostbusters",
+        "Groundhog Day",
+        "Happy Gilmore",
+        "Hot Fuzz",
+        "Notting Hill",
+        "Office Space",
+        "Palm Springs",
+        "Pretty Woman",
+        "Ratatouille",
+        "Superbad",
+        "The Big Lebowski",
+        "The Grand Budapest Hotel",
+        "The Princess Bride",
+        "There's Something About Mary",
+        "Toy Story",
+        "Tropic Thunder",
+        "When Harry Met Sally"
+      ],
+      "name": "Comedy Movies",
+      "number": 30,
+      "shuffle": "shuffle"
+    },
+    {
+      "content": [
+        "21 Jump Street",
+        "3:10 to Yuma",
+        "Aliens",
+        "Casino Royale",
+        "Commando",
+        "Die Hard",
+        "Edge of Tomorrow",
+        "Face/Off",
+        "First Blood",
+        "Gladiator",
+        "Hot Fuzz",
+        "Inception",
+        "John Wick",
+        "Jurassic Park",
+        "Lethal Weapon",
+        "Mad Max",
+        "Mad Max: Fury Road",
+        "Point Break",
+        "Predator",
+        "RoboCop",
+        "Speed",
+        "Spider-Man: Into the Spider-Verse",
+        "The Bourne Identity",
+        "The Incredibles",
+        "The Matrix",
+        "The Road Warrior",
+        "The Rock",
+        "The Terminator",
+        "Tombstone",
+        "Total Recall",
+        "Tropic Thunder"
+      ],
+      "name": "Action Movies",
+      "number": 31,
+      "shuffle": "shuffle"
+    },
+    {
+      "content": [
+        "28 Days Later",
+        "A Nightmare on Elm Street",
+        "Alien",
+        "Annihilation",
+        "Child's Play",
+        "Get Out",
+        "Hellraiser",
+        "Hereditary",
+        "It Follows",
+        "Midsommar",
+        "Poltergeist",
+        "Re-Animator",
+        "Scream",
+        "The Conjuring",
+        "The Evil Dead",
+        "The Fly",
+        "The Ring",
+        "The Shining",
+        "The Thing"
+      ],
+      "name": "Horror Movies",
+      "number": 32,
+      "shuffle": "shuffle"
+    },
+    {
+      "content": [
+        "28 Days Later",
+        "Alien",
+        "Aliens",
+        "Annihilation",
+        "Arrival",
+        "Back to the Future",
+        "Blade Runner",
+        "Blade Runner 2049",
+        "Children of Men",
+        "Contact",
+        "Dune",
+        "Edge of Tomorrow",
+        "Eternal Sunshine of the Spotless Mind",
+        "Ex Machina",
+        "Galaxy Quest",
+        "Inception",
+        "Interstellar",
+        "Jurassic Park",
+        "Looper",
+        "Mad Max: Fury Road",
+        "Predator",
+        "RoboCop",
+        "The Fly",
+        "The Martian",
+        "The Matrix",
+        "The Road Warrior",
+        "The Terminator",
+        "The Thing",
+        "Total Recall",
+        "WALL-E"
+      ],
+      "name": "Sci-Fi Movies",
+      "number": 33,
+      "shuffle": "shuffle"
+    },
+    {
+      "content": [
+        "American Beauty",
+        "Arrival",
+        "Blade Runner 2049",
+        "Contact",
+        "Django Unchained",
+        "Ex Machina",
+        "Gladiator",
+        "Goodfellas",
+        "Hereditary",
+        "Interstellar",
+        "La La Land",
+        "Memento",
+        "Midsommar",
+        "Moonlight",
+        "No Country for Old Men",
+        "Nomadland",
+        "Pan's Labyrinth",
+        "Parasite",
+        "Raging Bull",
+        "Soul",
+        "The Departed",
+        "The Grand Budapest Hotel",
+        "The Martian",
+        "The Shape of Water",
+        "The Shawshank Redemption",
+        "The Social Network",
+        "There Will Be Blood",
+        "Titanic",
+        "True Grit",
+        "Unforgiven",
+        "Up",
+        "Whiplash",
+        "Zodiac"
+      ],
+      "name": "Drama Movies",
+      "number": 34,
+      "shuffle": "shuffle"
+    },
+    {
+      "content": [
+        "Anchorman",
+        "Blade Runner 2049",
+        "Caddyshack",
+        "Django Unchained",
+        "Finding Nemo",
+        "Jurassic Park",
+        "Man on Wire",
+        "Pan's Labyrinth",
+        "Point Break",
+        "The Departed",
+        "The Ring",
+        "The Road Warrior",
+        "The Shining"
+      ],
+      "name": "Directed by Christopher Nolan",
+      "number": 50,
+      "shuffle": "shuffle"
+    },
+    {
+      "content": [
+        {
+          "movie": "Fargo"
+        }
+      ],
+      "name": "Fargo (movie)",
+      "number": 90,
+      "shuffle": "ordered"
+    },
+    {
+      "content": [
+        {
+          "show": "Fargo"
+        }
+      ],
+      "name": "Fargo (show)",
+      "number": 91,
+      "shuffle": "ordered"
+    },
+    {
+      "content": [
+        "Fargo"
+      ],
+      "name": "Fargo (plain)",
+      "number": 92,
+      "shuffle": "ordered"
+    },
+    {
+      "content": [
+        {
+          "collection": "Snapshot Action Classics"
+        }
+      ],
+      "name": "Action Classics",
+      "number": 93,
+      "shuffle": "shuffle"
+    },
+    {
+      "content": [
+        {
+          "collection": "Snapshot Partly Synced"
+        },
+        "Not A Real Title"
+      ],
+      "name": "Partly Synced",
+      "number": 94,
+      "shuffle": "shuffle"
+    },
+    {
+      "content": [
+        {
+          "exclude": [],
+          "match": "title_contains",
+          "order": "release_date",
+          "value": "Mad Max"
+        }
+      ],
+      "name": "Mad Max Saga",
+      "number": 96,
+      "shuffle": "ordered"
+    },
+    {
+      "commercials": {
+        "filler_list_id": "filler-90s",
+        "filler_list_name": "90s Ads",
+        "pad_minutes": 5
+      },
+      "content": [
+        "Cheers",
+        "Frasier"
+      ],
+      "name": "Sitcoms With Ads",
+      "number": 97,
+      "shuffle": "shuffle"
+    },
+    {
+      "content": [
+        "The Simpsons",
+        "Die Hard",
+        "Aliens"
+      ],
+      "name": "Interleaved",
+      "number": 98,
+      "playback": {
+        "episodes_per_block": 2,
+        "structure": "interleaved"
+      },
+      "shuffle": "shuffle"
+    },
+    {
+      "content": [
+        "Cheers",
+        "Die Hard"
+      ],
+      "name": "Timeline",
+      "number": 99,
+      "playback": {
+        "structure": "timeline"
+      },
+      "shuffle": "ordered"
+    },
+    {
+      "content": [
+        {
+          "ids": {
+            "plex": "src-plex:1029",
+            "tmdb": "999999999"
+          },
+          "movie": "Die Hard",
+          "year": 1988
+        }
+      ],
+      "name": "Pinned Die Hard",
+      "number": 100,
+      "shuffle": "ordered"
+    },
+    {
+      "content": [
+        "Cheers",
+        "Frasier"
+      ],
+      "name": "Block",
+      "number": 120,
+      "shuffle": "block"
+    }
+  ],
+  "orphaned": [],
+  "suggested_channels": []
+}

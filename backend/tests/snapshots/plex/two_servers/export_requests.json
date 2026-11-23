@@ -1,0 +1,11 @@
+{
+  "plex_requests": {
+    "GET http://plex.test:32400/library/sections": 1,
+    "GET http://plex.test:32400/library/sections/1/all?type=1": 1,
+    "GET http://plex.test:32400/library/sections/2/all?type=2": 1,
+    "GET http://plex2.test:32400/library/sections": 1,
+    "GET http://plex2.test:32400/library/sections/1/all?type=1": 1,
+    "GET http://plex2.test:32400/library/sections/2/all?type=2": 1
+  },
+  "writes": []
+}

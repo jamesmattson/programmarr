@@ -1,0 +1,11 @@
+{
+  "plex_requests": {
+    "GET http://plex.test:32400/library/metadata/9001/thumb": 1,
+    "GET http://plex.test:32400/library/metadata/9002/thumb": 1,
+    "GET http://plex.test:32400/library/sections": 5,
+    "GET http://plex.test:32400/library/sections/1/collections": 1,
+    "GET http://plex.test:32400/library/sections/2/collections": 1,
+    "GET http://plex.test:32400/library/sections/3/collections": 1
+  },
+  "writes": []
+}

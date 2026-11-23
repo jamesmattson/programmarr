@@ -1,0 +1,226 @@
+{
+  "plex_requests": {
+    "GET http://plex.test:32400/library/collections/9001/children": 1,
+    "GET http://plex.test:32400/library/sections": 1,
+    "GET http://plex.test:32400/library/sections/1/collections": 1
+  },
+  "writes": [
+    {
+      "body": {
+        "programs": [
+          "tunarr-ep-1131-1",
+          "tunarr-ep-1131-2",
+          "tunarr-ep-1131-3",
+          "tunarr-ep-1131-4",
+          "tunarr-ep-1132-1",
+          "tunarr-ep-1132-2",
+          "tunarr-ep-1132-3",
+          "tunarr-ep-1132-4"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 0,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-000000000001",
+              "order": "next",
+              "showId": "tunarr-show-1131",
+              "type": "show",
+              "weight": 1
+            },
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-000000000002",
+              "order": "next",
+              "showId": "tunarr-show-1132",
+              "type": "show",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/t-cheers/programming"
+    },
+    {
+      "body": null,
+      "method": "DELETE",
+      "url": "http://tunarr.test:8000/api/channels/t-gone"
+    },
+    {
+      "body": {
+        "channel": {
+          "disableFillerOverlay": false,
+          "duration": 0,
+          "fillerCollections": [],
+          "fillerRepeatCooldown": 30000,
+          "groupTitle": "tunarr",
+          "guideMinimumDuration": 30000,
+          "icon": {
+            "duration": 0,
+            "path": "",
+            "position": "bottom-right",
+            "width": 0
+          },
+          "id": "00000000-0000-0000-0000-000000000003",
+          "name": "Action Classics",
+          "number": 52,
+          "offline": {
+            "mode": "pic",
+            "picture": "",
+            "soundtrack": ""
+          },
+          "onDemand": {
+            "enabled": false
+          },
+          "startTime": 1767268800000,
+          "stealth": false,
+          "streamMode": "hls",
+          "subtitlesEnabled": false,
+          "transcodeConfigId": "tc-default",
+          "watermark": {
+            "animated": false,
+            "duration": 0,
+            "enabled": false,
+            "fixedSize": false,
+            "horizontalMargin": 1,
+            "opacity": 100,
+            "position": "bottom-right",
+            "url": "",
+            "verticalMargin": 1,
+            "width": 10
+          }
+        },
+        "type": "new"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels"
+    },
+    {
+      "body": {
+        "programs": [
+          "tunarr-movie-1029",
+          "tunarr-movie-1026",
+          "tunarr-movie-1027",
+          "tunarr-movie-1033",
+          "tunarr-movie-1155",
+          "tunarr-ep-1142-1",
+          "tunarr-ep-1142-2",
+          "tunarr-ep-1142-3",
+          "tunarr-ep-1142-4"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 0,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-000000000004",
+              "order": "shuffle",
+              "showId": "tunarr-show-1142",
+              "type": "show",
+              "weight": 1
+            },
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-000000000005",
+              "order": "shuffle",
+              "type": "movie",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/00000000-0000-0000-0000-000000000003/programming"
+    },
+    {
+      "body": {
+        "channel": {
+          "disableFillerOverlay": false,
+          "duration": 0,
+          "fillerCollections": [],
+          "fillerRepeatCooldown": 30000,
+          "groupTitle": "tunarr",
+          "guideMinimumDuration": 30000,
+          "icon": {
+            "duration": 0,
+            "path": "",
+            "position": "bottom-right",
+            "width": 0
+          },
+          "id": "00000000-0000-0000-0000-000000000006",
+          "name": "Mad Max Saga",
+          "number": 53,
+          "offline": {
+            "mode": "pic",
+            "picture": "",
+            "soundtrack": ""
+          },
+          "onDemand": {
+            "enabled": false
+          },
+          "startTime": 1767268800000,
+          "stealth": false,
+          "streamMode": "hls",
+          "subtitlesEnabled": false,
+          "transcodeConfigId": "tc-default",
+          "watermark": {
+            "animated": false,
+            "duration": 0,
+            "enabled": false,
+            "fixedSize": false,
+            "horizontalMargin": 1,
+            "opacity": 100,
+            "position": "bottom-right",
+            "url": "",
+            "verticalMargin": 1,
+            "width": 10
+          }
+        },
+        "type": "new"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels"
+    },
+    {
+      "body": {
+        "programs": [
+          "tunarr-movie-1021",
+          "tunarr-movie-1040"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 0,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-000000000007",
+              "order": "chronological",
+              "type": "movie",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/00000000-0000-0000-0000-000000000006/programming"
+    }
+  ]
+}

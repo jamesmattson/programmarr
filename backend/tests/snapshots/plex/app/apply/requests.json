@@ -1,0 +1,79 @@
+{
+  "plex_requests": {
+    "GET http://plex.test:32400/library/collections/9001/children": 1,
+    "GET http://plex.test:32400/library/sections": 1,
+    "GET http://plex.test:32400/library/sections/1/collections": 1
+  },
+  "writes": [
+    {
+      "body": {
+        "programs": [
+          "tunarr-movie-1029",
+          "tunarr-movie-1026",
+          "tunarr-movie-1027",
+          "tunarr-movie-1033",
+          "tunarr-movie-1155",
+          "tunarr-ep-1142-1",
+          "tunarr-ep-1142-2",
+          "tunarr-ep-1142-3",
+          "tunarr-ep-1142-4"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 0,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-000000000001",
+              "order": "shuffle",
+              "showId": "tunarr-show-1142",
+              "type": "show",
+              "weight": 1
+            },
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-000000000002",
+              "order": "shuffle",
+              "type": "movie",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/t-action/programming"
+    },
+    {
+      "body": {
+        "programs": [
+          "tunarr-movie-1029"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 0,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-000000000003",
+              "order": "chronological",
+              "type": "movie",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/t-pinned/programming"
+    }
+  ]
+}

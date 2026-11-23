@@ -1,0 +1,16 @@
+{
+  "channels": [
+    {
+      "content": [
+        {
+          "collection": "Snapshot Action Classics"
+        }
+      ],
+      "name": "Snapshot Action Classics",
+      "number": 80,
+      "shuffle": "shuffle"
+    }
+  ],
+  "orphaned": [],
+  "suggested_channels": []
+}

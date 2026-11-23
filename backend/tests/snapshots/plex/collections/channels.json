@@ -1,0 +1,32 @@
+{
+  "channels": [
+    {
+      "content": [
+        "Cheers"
+      ],
+      "name": "Kept",
+      "number": 10,
+      "shuffle": "ordered"
+    },
+    {
+      "content": [
+        {
+          "collection": "Snapshot Action Classics"
+        }
+      ],
+      "name": "Snapshot Action Classics",
+      "number": 80,
+      "shuffle": "shuffle"
+    },
+    {
+      "content": [
+        {
+          "collection": "Snapshot Partly Synced"
+        }
+      ],
+      "name": "Snapshot Partly Synced",
+      "number": 81,
+      "shuffle": "shuffle"
+    }
+  ]
+}

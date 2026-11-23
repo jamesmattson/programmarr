@@ -1,0 +1,159 @@
+Title,Year,Type,Rating,Genres,Director,Studio,Actors,Seasons,Episodes,Country,Mood,Style,Source
+Airplane!,1980,Movie,G,Comedy,Steven Spielberg,A24,Tom Hanks|Samuel L. Jackson|Scarlett Johansson,,,United States of America,Witty,,Plex
+Caddyshack,1980,Movie,PG,Comedy,Christopher Nolan,Universal Pictures,Samuel L. Jackson|Scarlett Johansson|Leonardo DiCaprio,,,United Kingdom,,Buddy Film,Plex
+Ghostbusters,1984,Movie,PG-13,Comedy|Fantasy,Quentin Tarantino,Warner Bros.,Scarlett Johansson|Leonardo DiCaprio|Frances McDormand,,,,Tense,,Plex
+Coming to America,1988,Movie,R,Comedy|Romance,Martin Scorsese,Paramount Pictures,Leonardo DiCaprio|Frances McDormand|Denzel Washington,,,France,Bleak|Brooding,Film Noir,Plex
+Groundhog Day,1993,Movie,G,Comedy|Romance,Greta Gerwig,Walt Disney Pictures,Frances McDormand|Denzel Washington|Tilda Swinton,,,Japan|United States of America,,Ensemble Film,Plex
+Dumb and Dumber,1994,Movie,PG,Comedy,Denis Villeneuve,20th Century Studios,Denzel Washington|Tilda Swinton|Oscar Isaac,,,United States of America,Witty,,Plex
+Happy Gilmore,1996,Movie,PG-13,Comedy,Kathryn Bigelow,New Line Cinema,Tilda Swinton|Oscar Isaac|Viola Davis,,,United Kingdom,,Buddy Film,Plex
+The Big Lebowski,1998,Movie,R,Comedy|Crime,Jordan Peele,Blumhouse,Oscar Isaac|Viola Davis|Brad Pitt,,,,Tense,,Plex
+There's Something About Mary,1998,Movie,G,Comedy|Romance,Ridley Scott,A24,Viola Davis|Brad Pitt|Cate Blanchett,,,France,Bleak|Brooding,Film Noir,Plex
+Office Space,1999,Movie,PG,Comedy,The Coen Brothers,Universal Pictures,Brad Pitt|Cate Blanchett|Michael B. Jordan,,,Japan|United States of America,,Ensemble Film,Plex
+Galaxy Quest,1999,Movie,PG-13,Comedy|Science Fiction,Steven Spielberg,Warner Bros.,Cate Blanchett|Michael B. Jordan|Saoirse Ronan,,,United States of America,Witty,,Plex
+Anchorman,2004,Movie,R,Comedy,Christopher Nolan,Paramount Pictures,Michael B. Jordan|Saoirse Ronan|Idris Elba,,,United Kingdom,,Buddy Film,Plex
+Superbad,2007,Movie,G,Comedy,Quentin Tarantino,Walt Disney Pictures,Saoirse Ronan|Idris Elba|Florence Pugh,,,,Tense,,Plex
+Hot Fuzz,2007,Movie,PG,Comedy|Action,Martin Scorsese,20th Century Studios,Idris Elba|Florence Pugh|Tom Hanks,,,France,Bleak|Brooding,Film Noir,Plex
+Tropic Thunder,2008,Movie,PG-13,Comedy|Action,Greta Gerwig,New Line Cinema,Florence Pugh|Tom Hanks|Samuel L. Jackson,,,Japan|United States of America,,Ensemble Film,Plex
+Bridesmaids,2011,Movie,R,Comedy|Romance,Denis Villeneuve,Blumhouse,Tom Hanks|Samuel L. Jackson|Scarlett Johansson,,,United States of America,Witty,,Plex
+21 Jump Street,2012,Movie,G,Comedy|Action,Kathryn Bigelow,A24,Samuel L. Jackson|Scarlett Johansson|Leonardo DiCaprio,,,United Kingdom,,Buddy Film,Plex
+The Grand Budapest Hotel,2014,Movie,PG,Comedy|Drama,Jordan Peele,Universal Pictures,Scarlett Johansson|Leonardo DiCaprio|Frances McDormand,,,,Tense,,Plex
+Game Night,2018,Movie,PG-13,Comedy|Crime,Ridley Scott,Warner Bros.,Leonardo DiCaprio|Frances McDormand|Denzel Washington,,,France,Bleak|Brooding,Film Noir,Plex
+Palm Springs,2020,Movie,R,Comedy|Romance,The Coen Brothers,Paramount Pictures,Frances McDormand|Denzel Washington|Tilda Swinton,,,Japan|United States of America,,Ensemble Film,Plex
+Mad Max,1979,Movie,G,Action,Steven Spielberg,Walt Disney Pictures,Denzel Washington|Tilda Swinton|Oscar Isaac,,,United States of America,Witty,,Plex
+The Road Warrior,1981,Movie,PG,Action|Science Fiction,Christopher Nolan,20th Century Studios,Tilda Swinton|Oscar Isaac|Viola Davis,,,United Kingdom,,Buddy Film,Plex
+First Blood,1982,Movie,PG-13,Action,Quentin Tarantino,New Line Cinema,Oscar Isaac|Viola Davis|Brad Pitt,,,,Tense,,Plex
+The Terminator,1984,Movie,R,Action|Science Fiction,Martin Scorsese,Blumhouse,Viola Davis|Brad Pitt|Cate Blanchett,,,France,Bleak|Brooding,Film Noir,Plex
+Commando,1985,Movie,G,Action,Greta Gerwig,A24,Brad Pitt|Cate Blanchett|Michael B. Jordan,,,Japan|United States of America,,Ensemble Film,Plex
+Aliens,1986,Movie,PG,Action|Science Fiction,Denis Villeneuve,Universal Pictures,Cate Blanchett|Michael B. Jordan|Saoirse Ronan,,,United States of America,Witty,,Plex
+Predator,1987,Movie,PG-13,Action|Science Fiction,Kathryn Bigelow,Warner Bros.,Michael B. Jordan|Saoirse Ronan|Idris Elba,,,United Kingdom,,Buddy Film,Plex
+RoboCop,1987,Movie,R,Action|Science Fiction,Jordan Peele,Paramount Pictures,Saoirse Ronan|Idris Elba|Florence Pugh,,,,Tense,,Plex
+Die Hard,1988,Movie,G,Action|Thriller,Ridley Scott,Walt Disney Pictures,Idris Elba|Florence Pugh|Tom Hanks,,,France,Bleak|Brooding,Film Noir,Plex
+Lethal Weapon,1987,Movie,PG,Action|Crime,The Coen Brothers,20th Century Studios,Florence Pugh|Tom Hanks|Samuel L. Jackson,,,Japan|United States of America,,Ensemble Film,Plex
+Total Recall,1990,Movie,PG-13,Action|Science Fiction,Steven Spielberg,New Line Cinema,Tom Hanks|Samuel L. Jackson|Scarlett Johansson,,,United States of America,Witty,,Plex
+Point Break,1991,Movie,R,Action|Crime,Christopher Nolan,Blumhouse,Samuel L. Jackson|Scarlett Johansson|Leonardo DiCaprio,,,United Kingdom,,Buddy Film,Plex
+Speed,1994,Movie,G,Action|Thriller,Quentin Tarantino,A24,Scarlett Johansson|Leonardo DiCaprio|Frances McDormand,,,,Tense,,Plex
+The Rock,1996,Movie,PG,Action|Thriller,Martin Scorsese,Universal Pictures,Leonardo DiCaprio|Frances McDormand|Denzel Washington,,,France,Bleak|Brooding,Film Noir,Plex
+Face/Off,1997,Movie,PG-13,Action|Thriller,Greta Gerwig,Warner Bros.,Frances McDormand|Denzel Washington|Tilda Swinton,,,Japan|United States of America,,Ensemble Film,Plex
+The Matrix,1999,Movie,R,Action|Science Fiction,Denis Villeneuve,Paramount Pictures,Denzel Washington|Tilda Swinton|Oscar Isaac,,,United States of America,Witty,,Plex
+Gladiator,2000,Movie,G,Action|Drama,Kathryn Bigelow,Walt Disney Pictures,Tilda Swinton|Oscar Isaac|Viola Davis,,,United Kingdom,,Buddy Film,Plex
+The Bourne Identity,2002,Movie,PG,Action|Thriller,Jordan Peele,20th Century Studios,Oscar Isaac|Viola Davis|Brad Pitt,,,,Tense,,Plex
+Casino Royale,2006,Movie,PG-13,Action|Thriller,Ridley Scott,New Line Cinema,Viola Davis|Brad Pitt|Cate Blanchett,,,France,Bleak|Brooding,Film Noir,Plex
+Mad Max: Fury Road,2015,Movie,R,Action|Science Fiction,The Coen Brothers,Blumhouse,Brad Pitt|Cate Blanchett|Michael B. Jordan,,,Japan|United States of America,,Ensemble Film,Plex
+John Wick,2014,Movie,G,Action|Crime,Steven Spielberg,A24,Cate Blanchett|Michael B. Jordan|Saoirse Ronan,,,United States of America,Witty,,Plex
+The Shining,1980,Movie,PG,Horror,Christopher Nolan,Universal Pictures,Michael B. Jordan|Saoirse Ronan|Idris Elba,,,United Kingdom,,Buddy Film,Plex
+The Evil Dead,1981,Movie,PG-13,Horror,Quentin Tarantino,Warner Bros.,Saoirse Ronan|Idris Elba|Florence Pugh,,,,Tense,,Plex
+Poltergeist,1982,Movie,R,Horror,Martin Scorsese,Paramount Pictures,Idris Elba|Florence Pugh|Tom Hanks,,,France,Bleak|Brooding,Film Noir,Plex
+The Thing,1982,Movie,G,Horror|Science Fiction,Greta Gerwig,Walt Disney Pictures,Florence Pugh|Tom Hanks|Samuel L. Jackson,,,Japan|United States of America,,Ensemble Film,Plex
+A Nightmare on Elm Street,1984,Movie,PG,Horror,Denis Villeneuve,20th Century Studios,Tom Hanks|Samuel L. Jackson|Scarlett Johansson,,,United States of America,Witty,,Plex
+Re-Animator,1985,Movie,PG-13,Horror,Kathryn Bigelow,New Line Cinema,Samuel L. Jackson|Scarlett Johansson|Leonardo DiCaprio,,,United Kingdom,,Buddy Film,Plex
+The Fly,1986,Movie,R,Horror|Science Fiction,Jordan Peele,Blumhouse,Scarlett Johansson|Leonardo DiCaprio|Frances McDormand,,,,Tense,,Plex
+Hellraiser,1987,Movie,G,Horror,Ridley Scott,A24,Leonardo DiCaprio|Frances McDormand|Denzel Washington,,,France,Bleak|Brooding,Film Noir,Plex
+Child's Play,1988,Movie,PG,Horror|Thriller,The Coen Brothers,Universal Pictures,Frances McDormand|Denzel Washington|Tilda Swinton,,,Japan|United States of America,,Ensemble Film,Plex
+Scream,1996,Movie,PG-13,Horror|Thriller,Steven Spielberg,Warner Bros.,Denzel Washington|Tilda Swinton|Oscar Isaac,,,United States of America,Witty,,Plex
+The Ring,2002,Movie,R,Horror|Thriller,Christopher Nolan,Paramount Pictures,Tilda Swinton|Oscar Isaac|Viola Davis,,,United Kingdom,,Buddy Film,Plex
+28 Days Later,2002,Movie,G,Horror|Science Fiction,Quentin Tarantino,Walt Disney Pictures,Oscar Isaac|Viola Davis|Brad Pitt,,,,Tense,,Plex
+The Conjuring,2013,Movie,PG,Horror|Thriller,Martin Scorsese,20th Century Studios,Viola Davis|Brad Pitt|Cate Blanchett,,,France,Bleak|Brooding,Film Noir,Plex
+It Follows,2014,Movie,PG-13,Horror,Greta Gerwig,New Line Cinema,Brad Pitt|Cate Blanchett|Michael B. Jordan,,,Japan|United States of America,,Ensemble Film,Plex
+Get Out,2017,Movie,R,Horror|Thriller,Denis Villeneuve,Blumhouse,Cate Blanchett|Michael B. Jordan|Saoirse Ronan,,,United States of America,Witty,,Plex
+Hereditary,2018,Movie,G,Horror|Drama,Kathryn Bigelow,A24,Michael B. Jordan|Saoirse Ronan|Idris Elba,,,United Kingdom,,Buddy Film,Plex
+Midsommar,2019,Movie,PG,Horror|Drama,Jordan Peele,Universal Pictures,Saoirse Ronan|Idris Elba|Florence Pugh,,,,Tense,,Plex
+Alien,1979,Movie,PG-13,Science Fiction|Horror,Ridley Scott,Warner Bros.,Idris Elba|Florence Pugh|Tom Hanks,,,France,Bleak|Brooding,Film Noir,Plex
+Blade Runner,1982,Movie,R,Science Fiction,The Coen Brothers,Paramount Pictures,Florence Pugh|Tom Hanks|Samuel L. Jackson,,,Japan|United States of America,,Ensemble Film,Plex
+Back to the Future,1985,Movie,G,Science Fiction|Comedy,Steven Spielberg,Walt Disney Pictures,Tom Hanks|Samuel L. Jackson|Scarlett Johansson,,,United States of America,Witty,,Plex
+Jurassic Park,1993,Movie,PG,Science Fiction|Action,Christopher Nolan,20th Century Studios,Samuel L. Jackson|Scarlett Johansson|Leonardo DiCaprio,,,United Kingdom,,Buddy Film,Plex
+Contact,1997,Movie,PG-13,Science Fiction|Drama,Quentin Tarantino,New Line Cinema,Scarlett Johansson|Leonardo DiCaprio|Frances McDormand,,,,Tense,,Plex
+Children of Men,2006,Movie,R,Science Fiction|Thriller,Martin Scorsese,Blumhouse,Leonardo DiCaprio|Frances McDormand|Denzel Washington,,,France,Bleak|Brooding,Film Noir,Plex
+Inception,2010,Movie,G,Science Fiction|Action,Greta Gerwig,A24,Frances McDormand|Denzel Washington|Tilda Swinton,,,Japan|United States of America,,Ensemble Film,Plex
+Looper,2012,Movie,PG,Science Fiction|Thriller,Denis Villeneuve,Universal Pictures,Denzel Washington|Tilda Swinton|Oscar Isaac,,,United States of America,Witty,,Plex
+Edge of Tomorrow,2014,Movie,PG-13,Science Fiction|Action,Kathryn Bigelow,Warner Bros.,Tilda Swinton|Oscar Isaac|Viola Davis,,,United Kingdom,,Buddy Film,Plex
+Interstellar,2014,Movie,R,Science Fiction|Drama,Jordan Peele,Paramount Pictures,Oscar Isaac|Viola Davis|Brad Pitt,,,,Tense,,Plex
+Ex Machina,2014,Movie,G,Science Fiction|Drama,Ridley Scott,Walt Disney Pictures,Viola Davis|Brad Pitt|Cate Blanchett,,,France,Bleak|Brooding,Film Noir,Plex
+The Martian,2015,Movie,PG,Science Fiction|Drama,The Coen Brothers,20th Century Studios,Brad Pitt|Cate Blanchett|Michael B. Jordan,,,Japan|United States of America,,Ensemble Film,Plex
+Arrival,2016,Movie,PG-13,Science Fiction|Drama,Steven Spielberg,New Line Cinema,Cate Blanchett|Michael B. Jordan|Saoirse Ronan,,,United States of America,Witty,,Plex
+Blade Runner 2049,2017,Movie,R,Science Fiction|Drama,Christopher Nolan,Blumhouse,Michael B. Jordan|Saoirse Ronan|Idris Elba,,,United Kingdom,,Buddy Film,Plex
+Annihilation,2018,Movie,G,Science Fiction|Horror,Quentin Tarantino,A24,Saoirse Ronan|Idris Elba|Florence Pugh,,,,Tense,,Plex
+Dune,2021,Movie,PG,Science Fiction|Adventure,Martin Scorsese,Universal Pictures,Idris Elba|Florence Pugh|Tom Hanks,,,France,Bleak|Brooding,Film Noir,Plex
+Raging Bull,1980,Movie,PG-13,Drama,Greta Gerwig,Warner Bros.,Florence Pugh|Tom Hanks|Samuel L. Jackson,,,Japan|United States of America,,Ensemble Film,Plex
+Goodfellas,1990,Movie,R,Drama|Crime,Denis Villeneuve,Paramount Pictures,Tom Hanks|Samuel L. Jackson|Scarlett Johansson,,,United States of America,Witty,,Plex
+The Shawshank Redemption,1994,Movie,G,Drama,Kathryn Bigelow,Walt Disney Pictures,Samuel L. Jackson|Scarlett Johansson|Leonardo DiCaprio,,,United Kingdom,,Buddy Film,Plex
+American Beauty,1999,Movie,PG,Drama,Jordan Peele,20th Century Studios,Scarlett Johansson|Leonardo DiCaprio|Frances McDormand,,,,Tense,,Plex
+Memento,2000,Movie,PG-13,Drama|Thriller,Ridley Scott,New Line Cinema,Leonardo DiCaprio|Frances McDormand|Denzel Washington,,,France,Bleak|Brooding,Film Noir,Plex
+No Country for Old Men,2007,Movie,R,Drama|Crime,The Coen Brothers,Blumhouse,Frances McDormand|Denzel Washington|Tilda Swinton,,,Japan|United States of America,,Ensemble Film,Plex
+There Will Be Blood,2007,Movie,G,Drama,Steven Spielberg,A24,Denzel Washington|Tilda Swinton|Oscar Isaac,,,United States of America,Witty,,Plex
+The Departed,2006,Movie,PG,Drama|Crime,Christopher Nolan,Universal Pictures,Tilda Swinton|Oscar Isaac|Viola Davis,,,United Kingdom,,Buddy Film,Plex
+Zodiac,2007,Movie,PG-13,Drama|Crime,Quentin Tarantino,Warner Bros.,Oscar Isaac|Viola Davis|Brad Pitt,,,,Tense,,Plex
+The Social Network,2010,Movie,R,Drama,Martin Scorsese,Paramount Pictures,Viola Davis|Brad Pitt|Cate Blanchett,,,France,Bleak|Brooding,Film Noir,Plex
+Whiplash,2014,Movie,G,Drama,Greta Gerwig,Walt Disney Pictures,Brad Pitt|Cate Blanchett|Michael B. Jordan,,,Japan|United States of America,,Ensemble Film,Plex
+Moonlight,2016,Movie,PG,Drama,Denis Villeneuve,20th Century Studios,Cate Blanchett|Michael B. Jordan|Saoirse Ronan,,,United States of America,Witty,,Plex
+Parasite,2019,Movie,PG-13,Drama|Thriller,Kathryn Bigelow,New Line Cinema,Michael B. Jordan|Saoirse Ronan|Idris Elba,,,United Kingdom,,Buddy Film,Plex
+Nomadland,2020,Movie,R,Drama,Jordan Peele,Blumhouse,Saoirse Ronan|Idris Elba|Florence Pugh,,,,Tense,,Plex
+The Lion King,1994,Movie,G,Animation,Ridley Scott,A24,Idris Elba|Florence Pugh|Tom Hanks,,,France,Bleak|Brooding,Film Noir,Plex
+Toy Story,1995,Movie,PG,Animation|Comedy,The Coen Brothers,Universal Pictures,Florence Pugh|Tom Hanks|Samuel L. Jackson,,,Japan|United States of America,,Ensemble Film,Plex
+Spirited Away,2001,Movie,PG-13,Animation|Fantasy,Steven Spielberg,Warner Bros.,Tom Hanks|Samuel L. Jackson|Scarlett Johansson,,,United States of America,Witty,,Plex
+Finding Nemo,2003,Movie,R,Animation|Comedy,Christopher Nolan,Paramount Pictures,Samuel L. Jackson|Scarlett Johansson|Leonardo DiCaprio,,,United Kingdom,,Buddy Film,Plex
+The Incredibles,2004,Movie,G,Animation|Action,Quentin Tarantino,Walt Disney Pictures,Scarlett Johansson|Leonardo DiCaprio|Frances McDormand,,,,Tense,,Plex
+Ratatouille,2007,Movie,PG,Animation|Comedy,Martin Scorsese,20th Century Studios,Leonardo DiCaprio|Frances McDormand|Denzel Washington,,,France,Bleak|Brooding,Film Noir,Plex
+WALL-E,2008,Movie,PG-13,Animation|Science Fiction,Greta Gerwig,New Line Cinema,Frances McDormand|Denzel Washington|Tilda Swinton,,,Japan|United States of America,,Ensemble Film,Plex
+Up,2009,Movie,R,Animation|Drama,Denis Villeneuve,Blumhouse,Denzel Washington|Tilda Swinton|Oscar Isaac,,,United States of America,Witty,,Plex
+Spider-Man: Into the Spider-Verse,2018,Movie,G,Animation|Action,Kathryn Bigelow,A24,Tilda Swinton|Oscar Isaac|Viola Davis,,,United Kingdom,,Buddy Film,Plex
+Soul,2020,Movie,PG,Animation|Drama,Jordan Peele,Universal Pictures,Oscar Isaac|Viola Davis|Brad Pitt,,,,Tense,,Plex
+Hoop Dreams,1994,Movie,PG-13,Documentary,Ridley Scott,Warner Bros.,Viola Davis|Brad Pitt|Cate Blanchett,,,France,Bleak|Brooding,Film Noir,Plex
+Bowling for Columbine,2002,Movie,R,Documentary,The Coen Brothers,Paramount Pictures,Brad Pitt|Cate Blanchett|Michael B. Jordan,,,Japan|United States of America,,Ensemble Film,Plex
+March of the Penguins,2005,Movie,G,Documentary,Steven Spielberg,Walt Disney Pictures,Cate Blanchett|Michael B. Jordan|Saoirse Ronan,,,United States of America,Witty,,Plex
+Man on Wire,2008,Movie,PG,Documentary,Christopher Nolan,20th Century Studios,Michael B. Jordan|Saoirse Ronan|Idris Elba,,,United Kingdom,,Buddy Film,Plex
+Searching for Sugar Man,2012,Movie,PG-13,Documentary,Quentin Tarantino,New Line Cinema,Saoirse Ronan|Idris Elba|Florence Pugh,,,,Tense,,Plex
+Won't You Be My Neighbor?,2018,Movie,R,Documentary,Martin Scorsese,Blumhouse,Idris Elba|Florence Pugh|Tom Hanks,,,France,Bleak|Brooding,Film Noir,Plex
+Free Solo,2018,Movie,G,Documentary,Greta Gerwig,A24,Florence Pugh|Tom Hanks|Samuel L. Jackson,,,Japan|United States of America,,Ensemble Film,Plex
+My Octopus Teacher,2020,Movie,PG,Documentary,Denis Villeneuve,Universal Pictures,Tom Hanks|Samuel L. Jackson|Scarlett Johansson,,,United States of America,Witty,,Plex
+The Outlaw Josey Wales,1976,Movie,PG-13,Western,Kathryn Bigelow,Warner Bros.,Samuel L. Jackson|Scarlett Johansson|Leonardo DiCaprio,,,United Kingdom,,Buddy Film,Plex
+Unforgiven,1992,Movie,R,Western|Drama,Jordan Peele,Paramount Pictures,Scarlett Johansson|Leonardo DiCaprio|Frances McDormand,,,,Tense,,Plex
+Tombstone,1993,Movie,G,Western|Action,Ridley Scott,Walt Disney Pictures,Leonardo DiCaprio|Frances McDormand|Denzel Washington,,,France,Bleak|Brooding,Film Noir,Plex
+3:10 to Yuma,2007,Movie,PG,Western|Action,The Coen Brothers,20th Century Studios,Frances McDormand|Denzel Washington|Tilda Swinton,,,Japan|United States of America,,Ensemble Film,Plex
+True Grit,2010,Movie,PG-13,Western|Drama,Steven Spielberg,New Line Cinema,Denzel Washington|Tilda Swinton|Oscar Isaac,,,United States of America,Witty,,Plex
+Django Unchained,2012,Movie,R,Western|Drama,Christopher Nolan,Blumhouse,Tilda Swinton|Oscar Isaac|Viola Davis,,,United Kingdom,,Buddy Film,Plex
+The Hateful Eight,2015,Movie,G,Western|Crime,Quentin Tarantino,A24,Oscar Isaac|Viola Davis|Brad Pitt,,,,Tense,,Plex
+When Harry Met Sally,1989,Movie,PG,Romance|Comedy,Martin Scorsese,Universal Pictures,Viola Davis|Brad Pitt|Cate Blanchett,,,France,Bleak|Brooding,Film Noir,Plex
+Pretty Woman,1990,Movie,PG-13,Romance|Comedy,Greta Gerwig,Warner Bros.,Brad Pitt|Cate Blanchett|Michael B. Jordan,,,Japan|United States of America,,Ensemble Film,Plex
+Titanic,1997,Movie,R,Romance|Drama,Denis Villeneuve,Paramount Pictures,Cate Blanchett|Michael B. Jordan|Saoirse Ronan,,,United States of America,Witty,,Plex
+Notting Hill,1999,Movie,G,Romance|Comedy,Kathryn Bigelow,Walt Disney Pictures,Michael B. Jordan|Saoirse Ronan|Idris Elba,,,United Kingdom,,Buddy Film,Plex
+Eternal Sunshine of the Spotless Mind,2004,Movie,PG,Romance|Science Fiction,Jordan Peele,20th Century Studios,Saoirse Ronan|Idris Elba|Florence Pugh,,,,Tense,,Plex
+La La Land,2016,Movie,PG-13,Romance|Drama,Ridley Scott,New Line Cinema,Idris Elba|Florence Pugh|Tom Hanks,,,France,Bleak|Brooding,Film Noir,Plex
+The Princess Bride,1987,Movie,R,Fantasy|Comedy,The Coen Brothers,Blumhouse,Florence Pugh|Tom Hanks|Samuel L. Jackson,,,Japan|United States of America,,Ensemble Film,Plex
+The Lord of the Rings: The Fellowship of the Ring,2001,Movie,G,Fantasy|Adventure,Steven Spielberg,A24,Tom Hanks|Samuel L. Jackson|Scarlett Johansson,,,United States of America,Witty,,Plex
+Pan's Labyrinth,2006,Movie,PG,Fantasy|Drama,Christopher Nolan,Universal Pictures,Samuel L. Jackson|Scarlett Johansson|Leonardo DiCaprio,,,United Kingdom,,Buddy Film,Plex
+The Shape of Water,2017,Movie,PG-13,Fantasy|Drama,Quentin Tarantino,Warner Bros.,Scarlett Johansson|Leonardo DiCaprio|Frances McDormand,,,,Tense,,Plex
+The Green Knight,2021,Movie,R,Fantasy|Adventure,Martin Scorsese,Paramount Pictures,Leonardo DiCaprio|Frances McDormand|Denzel Washington,,,France,Bleak|Brooding,Film Noir,Plex
+Fargo,1996,Movie,R,Crime|Drama,Joel Coen,PolyGram,Frances McDormand|William H. Macy|Supporting Actor 1,,,United Kingdom,,Buddy Film,Plex
+Second Server Movie,2005,Movie,R,Drama,Second Director,Second Studio,Second Lead|Second Co-Star|Supporting Actor 4,,,Japan|United States of America,,Ensemble Film,Plex 2
+The Simpsons,1985,TV,TV-14,Animation|Comedy,,NBC,Lead 0|Co-Star 0|Regular 0,35,768,United States of America,,,Plex
+Friends,1988,TV,TV-14,Comedy|Romance,,CBS,Lead 1|Co-Star 1|Regular 1,10,236,United Kingdom,,,Plex
+Seinfeld,1991,TV,TV-14,Comedy,,FOX,Lead 2|Co-Star 2|Regular 2,9,180,,,,Plex
+The Office,1994,TV,TV-14,Comedy,,HBO,Lead 3|Co-Star 3|Regular 3,9,201,France,,,Plex
+Parks and Recreation,1997,TV,TV-14,Comedy,,ABC,Lead 4|Co-Star 4|Regular 4,7,126,Japan|United States of America,,,Plex
+It's Always Sunny in Philadelphia,2000,TV,TV-14,Comedy,,NBC,Lead 5|Co-Star 5|Regular 5,16,170,United States of America,,,Plex
+Cheers,2003,TV,TV-14,Comedy,,CBS,Lead 6|Co-Star 6|Regular 6,11,275,United Kingdom,,,Plex
+Frasier,2006,TV,TV-14,Comedy,,FOX,Lead 7|Co-Star 7|Regular 7,11,264,,,,Plex
+Breaking Bad,2009,TV,TV-14,Drama|Crime,,HBO,Lead 8|Co-Star 8|Regular 8,5,62,France,,,Plex
+Better Call Saul,2012,TV,TV-14,Drama|Crime,,ABC,Lead 9|Co-Star 9|Regular 9,6,63,Japan|United States of America,,,Plex
+The Sopranos,2015,TV,TV-14,Drama|Crime,,NBC,Lead 10|Co-Star 10|Regular 10,6,86,United States of America,,,Plex
+Mad Men,2018,TV,TV-14,Drama,,CBS,Lead 11|Co-Star 11|Regular 11,7,92,United Kingdom,,,Plex
+The Wire,1986,TV,TV-14,Drama|Crime,,FOX,Lead 12|Co-Star 12|Regular 12,5,60,,,,Plex
+Lost,1989,TV,TV-14,Drama|Science Fiction,,HBO,Lead 13|Co-Star 13|Regular 13,6,121,France,,,Plex
+The X-Files,1992,TV,TV-14,Drama|Science Fiction,,ABC,Lead 14|Co-Star 14|Regular 14,11,218,Japan|United States of America,,,Plex
+Stranger Things,1995,TV,TV-14,Drama|Science Fiction,,NBC,Lead 15|Co-Star 15|Regular 15,4,34,United States of America,,,Plex
+Game of Thrones,1998,TV,TV-14,Drama|Fantasy,,CBS,Lead 16|Co-Star 16|Regular 16,8,73,United Kingdom,,,Plex
+Fargo,2001,TV,TV-14,Drama|Crime,,FOX,Lead 17|Co-Star 17|Regular 17,5,51,,,,Plex
+True Detective,2004,TV,TV-14,Drama|Crime,,HBO,Lead 18|Co-Star 18|Regular 18,4,30,France,,,Plex
+Twin Peaks,2007,TV,TV-14,Drama|Mystery,,ABC,Lead 19|Co-Star 19|Regular 19,3,48,Japan|United States of America,,,Plex
+Rick and Morty,2010,TV,TV-14,Animation|Comedy,,NBC,Lead 20|Co-Star 20|Regular 20,7,71,United States of America,,,Plex
+Futurama,2013,TV,TV-14,Animation|Comedy,,CBS,Lead 21|Co-Star 21|Regular 21,8,140,United Kingdom,,,Plex
+BoJack Horseman,2016,TV,TV-14,Animation|Comedy,,FOX,Lead 22|Co-Star 22|Regular 22,6,77,,,,Plex
+Archer,2019,TV,TV-14,Animation|Comedy,,HBO,Lead 23|Co-Star 23|Regular 23,14,146,France,,,Plex
+Avatar: The Last Airbender,1987,TV,TV-14,Animation|Adventure,,ABC,Lead 24|Co-Star 24|Regular 24,3,61,Japan|United States of America,,,Plex
+Planet Earth,1990,TV,TV-14,Documentary,,NBC,Lead 25|Co-Star 25|Regular 25,2,17,United States of America,,,Plex
+Cosmos,1993,TV,TV-14,Documentary,,CBS,Lead 26|Co-Star 26|Regular 26,2,26,United Kingdom,,,Plex
+Chernobyl,1996,TV,TV-14,Drama,,FOX,Lead 27|Co-Star 27|Regular 27,1,5,,,,Plex
+Band of Brothers,1999,TV,TV-14,Drama,,HBO,Lead 28|Co-Star 28|Regular 28,1,10,France,,,Plex
+Sherlock,2002,TV,TV-14,Drama|Mystery,,ABC,Lead 29|Co-Star 29|Regular 29,4,15,Japan|United States of America,,,Plex
+Second Server Show,1994,TV,TV-PG,Drama,,HBO,Lead 3|Co-Star 3|Regular 3,2,20,France,,,Plex 2
+Tunarr Only Movie,1999,Movie,PG-13,Comedy,Some Director,Indie,A|B|C,,,,,,Plex

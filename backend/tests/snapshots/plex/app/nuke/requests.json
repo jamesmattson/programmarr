@@ -1,0 +1,1864 @@
+{
+  "plex_requests": {
+    "GET http://plex.test:32400/library/collections/9001/children": 1,
+    "GET http://plex.test:32400/library/collections/9002/children": 1,
+    "GET http://plex.test:32400/library/sections": 1,
+    "GET http://plex.test:32400/library/sections/1/collections": 2
+  },
+  "writes": [
+    {
+      "body": null,
+      "method": "DELETE",
+      "url": "http://tunarr.test:8000/api/channels/old-hand-built"
+    },
+    {
+      "body": null,
+      "method": "DELETE",
+      "url": "http://tunarr.test:8000/api/channels/old-simpsons"
+    },
+    {
+      "body": {
+        "channel": {
+          "disableFillerOverlay": false,
+          "duration": 0,
+          "fillerCollections": [],
+          "fillerRepeatCooldown": 30000,
+          "groupTitle": "tunarr",
+          "guideMinimumDuration": 30000,
+          "icon": {
+            "duration": 0,
+            "path": "",
+            "position": "bottom-right",
+            "width": 0
+          },
+          "id": "00000000-0000-0000-0000-000000000001",
+          "name": "The Simpsons 24/7",
+          "number": 10,
+          "offline": {
+            "mode": "pic",
+            "picture": "",
+            "soundtrack": ""
+          },
+          "onDemand": {
+            "enabled": false
+          },
+          "startTime": 1767268800000,
+          "stealth": false,
+          "streamMode": "hls",
+          "subtitlesEnabled": false,
+          "transcodeConfigId": "tc-default",
+          "watermark": {
+            "animated": false,
+            "duration": 0,
+            "enabled": false,
+            "fixedSize": false,
+            "horizontalMargin": 1,
+            "opacity": 100,
+            "position": "bottom-right",
+            "url": "",
+            "verticalMargin": 1,
+            "width": 10
+          }
+        },
+        "type": "new"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels"
+    },
+    {
+      "body": {
+        "programs": [
+          "tunarr-ep-1125-1",
+          "tunarr-ep-1125-2",
+          "tunarr-ep-1125-3",
+          "tunarr-ep-1125-4"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 0,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-000000000002",
+              "order": "next",
+              "showId": "tunarr-show-1125",
+              "type": "show",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/00000000-0000-0000-0000-000000000001/programming"
+    },
+    {
+      "body": {
+        "channel": {
+          "disableFillerOverlay": false,
+          "duration": 0,
+          "fillerCollections": [],
+          "fillerRepeatCooldown": 30000,
+          "groupTitle": "tunarr",
+          "guideMinimumDuration": 30000,
+          "icon": {
+            "duration": 0,
+            "path": "",
+            "position": "bottom-right",
+            "width": 0
+          },
+          "id": "00000000-0000-0000-0000-000000000003",
+          "name": "Cheers 24/7",
+          "number": 11,
+          "offline": {
+            "mode": "pic",
+            "picture": "",
+            "soundtrack": ""
+          },
+          "onDemand": {
+            "enabled": false
+          },
+          "startTime": 1767268800000,
+          "stealth": false,
+          "streamMode": "hls",
+          "subtitlesEnabled": false,
+          "transcodeConfigId": "tc-default",
+          "watermark": {
+            "animated": false,
+            "duration": 0,
+            "enabled": false,
+            "fixedSize": false,
+            "horizontalMargin": 1,
+            "opacity": 100,
+            "position": "bottom-right",
+            "url": "",
+            "verticalMargin": 1,
+            "width": 10
+          }
+        },
+        "type": "new"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels"
+    },
+    {
+      "body": {
+        "programs": [
+          "tunarr-ep-1131-1",
+          "tunarr-ep-1131-2",
+          "tunarr-ep-1131-3",
+          "tunarr-ep-1131-4"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 0,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-000000000004",
+              "order": "next",
+              "showId": "tunarr-show-1131",
+              "type": "show",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/00000000-0000-0000-0000-000000000003/programming"
+    },
+    {
+      "body": {
+        "channel": {
+          "disableFillerOverlay": false,
+          "duration": 0,
+          "fillerCollections": [],
+          "fillerRepeatCooldown": 30000,
+          "groupTitle": "tunarr",
+          "guideMinimumDuration": 30000,
+          "icon": {
+            "duration": 0,
+            "path": "",
+            "position": "bottom-right",
+            "width": 0
+          },
+          "id": "00000000-0000-0000-0000-000000000005",
+          "name": "Frasier 24/7",
+          "number": 12,
+          "offline": {
+            "mode": "pic",
+            "picture": "",
+            "soundtrack": ""
+          },
+          "onDemand": {
+            "enabled": false
+          },
+          "startTime": 1767268800000,
+          "stealth": false,
+          "streamMode": "hls",
+          "subtitlesEnabled": false,
+          "transcodeConfigId": "tc-default",
+          "watermark": {
+            "animated": false,
+            "duration": 0,
+            "enabled": false,
+            "fixedSize": false,
+            "horizontalMargin": 1,
+            "opacity": 100,
+            "position": "bottom-right",
+            "url": "",
+            "verticalMargin": 1,
+            "width": 10
+          }
+        },
+        "type": "new"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels"
+    },
+    {
+      "body": {
+        "programs": [
+          "tunarr-ep-1132-1",
+          "tunarr-ep-1132-2",
+          "tunarr-ep-1132-3",
+          "tunarr-ep-1132-4"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 0,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-000000000006",
+              "order": "next",
+              "showId": "tunarr-show-1132",
+              "type": "show",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/00000000-0000-0000-0000-000000000005/programming"
+    },
+    {
+      "body": {
+        "channel": {
+          "disableFillerOverlay": false,
+          "duration": 0,
+          "fillerCollections": [],
+          "fillerRepeatCooldown": 30000,
+          "groupTitle": "tunarr",
+          "guideMinimumDuration": 30000,
+          "icon": {
+            "duration": 0,
+            "path": "",
+            "position": "bottom-right",
+            "width": 0
+          },
+          "id": "00000000-0000-0000-0000-000000000007",
+          "name": "Friends 24/7",
+          "number": 13,
+          "offline": {
+            "mode": "pic",
+            "picture": "",
+            "soundtrack": ""
+          },
+          "onDemand": {
+            "enabled": false
+          },
+          "startTime": 1767268800000,
+          "stealth": false,
+          "streamMode": "hls",
+          "subtitlesEnabled": false,
+          "transcodeConfigId": "tc-default",
+          "watermark": {
+            "animated": false,
+            "duration": 0,
+            "enabled": false,
+            "fixedSize": false,
+            "horizontalMargin": 1,
+            "opacity": 100,
+            "position": "bottom-right",
+            "url": "",
+            "verticalMargin": 1,
+            "width": 10
+          }
+        },
+        "type": "new"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels"
+    },
+    {
+      "body": {
+        "programs": [
+          "tunarr-ep-1126-1",
+          "tunarr-ep-1126-2",
+          "tunarr-ep-1126-3",
+          "tunarr-ep-1126-4"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 0,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-000000000008",
+              "order": "next",
+              "showId": "tunarr-show-1126",
+              "type": "show",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/00000000-0000-0000-0000-000000000007/programming"
+    },
+    {
+      "body": {
+        "channel": {
+          "disableFillerOverlay": false,
+          "duration": 0,
+          "fillerCollections": [],
+          "fillerRepeatCooldown": 30000,
+          "groupTitle": "tunarr",
+          "guideMinimumDuration": 30000,
+          "icon": {
+            "duration": 0,
+            "path": "",
+            "position": "bottom-right",
+            "width": 0
+          },
+          "id": "00000000-0000-0000-0000-000000000009",
+          "name": "Comedy Movies",
+          "number": 30,
+          "offline": {
+            "mode": "pic",
+            "picture": "",
+            "soundtrack": ""
+          },
+          "onDemand": {
+            "enabled": false
+          },
+          "startTime": 1767268800000,
+          "stealth": false,
+          "streamMode": "hls",
+          "subtitlesEnabled": false,
+          "transcodeConfigId": "tc-default",
+          "watermark": {
+            "animated": false,
+            "duration": 0,
+            "enabled": false,
+            "fixedSize": false,
+            "horizontalMargin": 1,
+            "opacity": 100,
+            "position": "bottom-right",
+            "url": "",
+            "verticalMargin": 1,
+            "width": 10
+          }
+        },
+        "type": "new"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels"
+    },
+    {
+      "body": {
+        "programs": [
+          "tunarr-movie-1017",
+          "tunarr-movie-1001",
+          "tunarr-movie-1012",
+          "tunarr-movie-1061",
+          "tunarr-movie-1016",
+          "tunarr-movie-1002",
+          "tunarr-movie-1004",
+          "tunarr-movie-1006",
+          "tunarr-movie-1092",
+          "tunarr-movie-1011",
+          "tunarr-movie-1019",
+          "tunarr-movie-1003",
+          "tunarr-movie-1005",
+          "tunarr-movie-1007",
+          "tunarr-movie-1014",
+          "tunarr-movie-1117",
+          "tunarr-movie-1010",
+          "tunarr-movie-1020",
+          "tunarr-movie-1115",
+          "tunarr-movie-1094",
+          "tunarr-movie-1013",
+          "tunarr-movie-1008",
+          "tunarr-movie-1018",
+          "tunarr-movie-1120",
+          "tunarr-movie-1009",
+          "tunarr-movie-1090",
+          "tunarr-movie-1015",
+          "tunarr-movie-1114"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 0,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-00000000000a",
+              "order": "shuffle",
+              "type": "movie",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/00000000-0000-0000-0000-000000000009/programming"
+    },
+    {
+      "body": {
+        "channel": {
+          "disableFillerOverlay": false,
+          "duration": 0,
+          "fillerCollections": [],
+          "fillerRepeatCooldown": 30000,
+          "groupTitle": "tunarr",
+          "guideMinimumDuration": 30000,
+          "icon": {
+            "duration": 0,
+            "path": "",
+            "position": "bottom-right",
+            "width": 0
+          },
+          "id": "00000000-0000-0000-0000-00000000000b",
+          "name": "Action Movies",
+          "number": 31,
+          "offline": {
+            "mode": "pic",
+            "picture": "",
+            "soundtrack": ""
+          },
+          "onDemand": {
+            "enabled": false
+          },
+          "startTime": 1767268800000,
+          "stealth": false,
+          "streamMode": "hls",
+          "subtitlesEnabled": false,
+          "transcodeConfigId": "tc-default",
+          "watermark": {
+            "animated": false,
+            "duration": 0,
+            "enabled": false,
+            "fixedSize": false,
+            "horizontalMargin": 1,
+            "opacity": 100,
+            "position": "bottom-right",
+            "url": "",
+            "verticalMargin": 1,
+            "width": 10
+          }
+        },
+        "type": "new"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels"
+    },
+    {
+      "body": {
+        "programs": [
+          "tunarr-movie-1017",
+          "tunarr-movie-1110",
+          "tunarr-movie-1026",
+          "tunarr-movie-1039",
+          "tunarr-movie-1025",
+          "tunarr-movie-1029",
+          "tunarr-movie-1067",
+          "tunarr-movie-1035",
+          "tunarr-movie-1023",
+          "tunarr-movie-1037",
+          "tunarr-movie-1014",
+          "tunarr-movie-1065",
+          "tunarr-movie-1041",
+          "tunarr-movie-1062",
+          "tunarr-movie-1030",
+          "tunarr-movie-1021",
+          "tunarr-movie-1040",
+          "tunarr-movie-1032",
+          "tunarr-movie-1027",
+          "tunarr-movie-1028",
+          "tunarr-movie-1033",
+          "tunarr-movie-1097",
+          "tunarr-movie-1038",
+          "tunarr-movie-1093",
+          "tunarr-movie-1036",
+          "tunarr-movie-1022",
+          "tunarr-movie-1034",
+          "tunarr-movie-1024",
+          "tunarr-movie-1109",
+          "tunarr-movie-1031",
+          "tunarr-movie-1015"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 0,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-00000000000c",
+              "order": "shuffle",
+              "type": "movie",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/00000000-0000-0000-0000-00000000000b/programming"
+    },
+    {
+      "body": {
+        "channel": {
+          "disableFillerOverlay": false,
+          "duration": 0,
+          "fillerCollections": [],
+          "fillerRepeatCooldown": 30000,
+          "groupTitle": "tunarr",
+          "guideMinimumDuration": 30000,
+          "icon": {
+            "duration": 0,
+            "path": "",
+            "position": "bottom-right",
+            "width": 0
+          },
+          "id": "00000000-0000-0000-0000-00000000000d",
+          "name": "Horror Movies",
+          "number": 32,
+          "offline": {
+            "mode": "pic",
+            "picture": "",
+            "soundtrack": ""
+          },
+          "onDemand": {
+            "enabled": false
+          },
+          "startTime": 1767268800000,
+          "stealth": false,
+          "streamMode": "hls",
+          "subtitlesEnabled": false,
+          "transcodeConfigId": "tc-default",
+          "watermark": {
+            "animated": false,
+            "duration": 0,
+            "enabled": false,
+            "fixedSize": false,
+            "horizontalMargin": 1,
+            "opacity": 100,
+            "position": "bottom-right",
+            "url": "",
+            "verticalMargin": 1,
+            "width": 10
+          }
+        },
+        "type": "new"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels"
+    },
+    {
+      "body": {
+        "programs": [
+          "tunarr-movie-1053",
+          "tunarr-movie-1046",
+          "tunarr-movie-1059",
+          "tunarr-movie-1073",
+          "tunarr-movie-1050",
+          "tunarr-movie-1056",
+          "tunarr-movie-1049",
+          "tunarr-movie-1057",
+          "tunarr-movie-1055",
+          "tunarr-movie-1058",
+          "tunarr-movie-1044",
+          "tunarr-movie-1047",
+          "tunarr-movie-1051",
+          "tunarr-movie-1054",
+          "tunarr-movie-1043",
+          "tunarr-movie-1048",
+          "tunarr-movie-1052",
+          "tunarr-movie-1042",
+          "tunarr-movie-1045"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 0,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-00000000000e",
+              "order": "shuffle",
+              "type": "movie",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/00000000-0000-0000-0000-00000000000d/programming"
+    },
+    {
+      "body": {
+        "channel": {
+          "disableFillerOverlay": false,
+          "duration": 0,
+          "fillerCollections": [],
+          "fillerRepeatCooldown": 30000,
+          "groupTitle": "tunarr",
+          "guideMinimumDuration": 30000,
+          "icon": {
+            "duration": 0,
+            "path": "",
+            "position": "bottom-right",
+            "width": 0
+          },
+          "id": "00000000-0000-0000-0000-00000000000f",
+          "name": "Sci-Fi Movies",
+          "number": 33,
+          "offline": {
+            "mode": "pic",
+            "picture": "",
+            "soundtrack": ""
+          },
+          "onDemand": {
+            "enabled": false
+          },
+          "startTime": 1767268800000,
+          "stealth": false,
+          "streamMode": "hls",
+          "subtitlesEnabled": false,
+          "transcodeConfigId": "tc-default",
+          "watermark": {
+            "animated": false,
+            "duration": 0,
+            "enabled": false,
+            "fixedSize": false,
+            "horizontalMargin": 1,
+            "opacity": 100,
+            "position": "bottom-right",
+            "url": "",
+            "verticalMargin": 1,
+            "width": 10
+          }
+        },
+        "type": "new"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels"
+    },
+    {
+      "body": {
+        "programs": [
+          "tunarr-movie-1053",
+          "tunarr-movie-1059",
+          "tunarr-movie-1026",
+          "tunarr-movie-1073",
+          "tunarr-movie-1071",
+          "tunarr-movie-1061",
+          "tunarr-movie-1060",
+          "tunarr-movie-1072",
+          "tunarr-movie-1064",
+          "tunarr-movie-1063",
+          "tunarr-movie-1074",
+          "tunarr-movie-1067",
+          "tunarr-movie-1118",
+          "tunarr-movie-1069",
+          "tunarr-movie-1011",
+          "tunarr-movie-1065",
+          "tunarr-movie-1068",
+          "tunarr-movie-1062",
+          "tunarr-movie-1066",
+          "tunarr-movie-1040",
+          "tunarr-movie-1027",
+          "tunarr-movie-1028",
+          "tunarr-movie-1048",
+          "tunarr-movie-1070",
+          "tunarr-movie-1036",
+          "tunarr-movie-1022",
+          "tunarr-movie-1024",
+          "tunarr-movie-1045",
+          "tunarr-movie-1031",
+          "tunarr-movie-1095"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 0,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-000000000010",
+              "order": "shuffle",
+              "type": "movie",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/00000000-0000-0000-0000-00000000000f/programming"
+    },
+    {
+      "body": {
+        "channel": {
+          "disableFillerOverlay": false,
+          "duration": 0,
+          "fillerCollections": [],
+          "fillerRepeatCooldown": 30000,
+          "groupTitle": "tunarr",
+          "guideMinimumDuration": 30000,
+          "icon": {
+            "duration": 0,
+            "path": "",
+            "position": "bottom-right",
+            "width": 0
+          },
+          "id": "00000000-0000-0000-0000-000000000011",
+          "name": "Drama Movies",
+          "number": 34,
+          "offline": {
+            "mode": "pic",
+            "picture": "",
+            "soundtrack": ""
+          },
+          "onDemand": {
+            "enabled": false
+          },
+          "startTime": 1767268800000,
+          "stealth": false,
+          "streamMode": "hls",
+          "subtitlesEnabled": false,
+          "transcodeConfigId": "tc-default",
+          "watermark": {
+            "animated": false,
+            "duration": 0,
+            "enabled": false,
+            "fixedSize": false,
+            "horizontalMargin": 1,
+            "opacity": 100,
+            "position": "bottom-right",
+            "url": "",
+            "verticalMargin": 1,
+            "width": 10
+          }
+        },
+        "type": "new"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels"
+    },
+    {
+      "body": {
+        "programs": [
+          "tunarr-movie-1078",
+          "tunarr-movie-1071",
+          "tunarr-movie-1072",
+          "tunarr-movie-1063",
+          "tunarr-movie-1112",
+          "tunarr-movie-1069",
+          "tunarr-movie-1037",
+          "tunarr-movie-1076",
+          "tunarr-movie-1057",
+          "tunarr-movie-1068",
+          "tunarr-movie-1119",
+          "tunarr-movie-1079",
+          "tunarr-movie-1058",
+          "tunarr-movie-1086",
+          "tunarr-movie-1080",
+          "tunarr-movie-1088",
+          "tunarr-movie-1122",
+          "tunarr-movie-1087",
+          "tunarr-movie-1075",
+          "tunarr-movie-1098",
+          "tunarr-movie-1082",
+          "tunarr-movie-1018",
+          "tunarr-movie-1070",
+          "tunarr-movie-1123",
+          "tunarr-movie-1077",
+          "tunarr-movie-1084",
+          "tunarr-movie-1081",
+          "tunarr-movie-1116",
+          "tunarr-movie-1111",
+          "tunarr-movie-1108",
+          "tunarr-movie-1096",
+          "tunarr-movie-1085",
+          "tunarr-movie-1083"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 0,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-000000000012",
+              "order": "shuffle",
+              "type": "movie",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/00000000-0000-0000-0000-000000000011/programming"
+    },
+    {
+      "body": {
+        "channel": {
+          "disableFillerOverlay": false,
+          "duration": 0,
+          "fillerCollections": [],
+          "fillerRepeatCooldown": 30000,
+          "groupTitle": "tunarr",
+          "guideMinimumDuration": 30000,
+          "icon": {
+            "duration": 0,
+            "path": "",
+            "position": "bottom-right",
+            "width": 0
+          },
+          "id": "00000000-0000-0000-0000-000000000013",
+          "name": "Directed by Christopher Nolan",
+          "number": 50,
+          "offline": {
+            "mode": "pic",
+            "picture": "",
+            "soundtrack": ""
+          },
+          "onDemand": {
+            "enabled": false
+          },
+          "startTime": 1767268800000,
+          "stealth": false,
+          "streamMode": "hls",
+          "subtitlesEnabled": false,
+          "transcodeConfigId": "tc-default",
+          "watermark": {
+            "animated": false,
+            "duration": 0,
+            "enabled": false,
+            "fixedSize": false,
+            "horizontalMargin": 1,
+            "opacity": 100,
+            "position": "bottom-right",
+            "url": "",
+            "verticalMargin": 1,
+            "width": 10
+          }
+        },
+        "type": "new"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels"
+    },
+    {
+      "body": {
+        "programs": [
+          "tunarr-movie-1012",
+          "tunarr-movie-1072",
+          "tunarr-movie-1002",
+          "tunarr-movie-1112",
+          "tunarr-movie-1092",
+          "tunarr-movie-1062",
+          "tunarr-movie-1102",
+          "tunarr-movie-1122",
+          "tunarr-movie-1032",
+          "tunarr-movie-1082",
+          "tunarr-movie-1052",
+          "tunarr-movie-1022",
+          "tunarr-movie-1042"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 0,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-000000000014",
+              "order": "shuffle",
+              "type": "movie",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/00000000-0000-0000-0000-000000000013/programming"
+    },
+    {
+      "body": {
+        "channel": {
+          "disableFillerOverlay": false,
+          "duration": 0,
+          "fillerCollections": [],
+          "fillerRepeatCooldown": 30000,
+          "groupTitle": "tunarr",
+          "guideMinimumDuration": 30000,
+          "icon": {
+            "duration": 0,
+            "path": "",
+            "position": "bottom-right",
+            "width": 0
+          },
+          "id": "00000000-0000-0000-0000-000000000015",
+          "name": "Fargo (movie)",
+          "number": 90,
+          "offline": {
+            "mode": "pic",
+            "picture": "",
+            "soundtrack": ""
+          },
+          "onDemand": {
+            "enabled": false
+          },
+          "startTime": 1767268800000,
+          "stealth": false,
+          "streamMode": "hls",
+          "subtitlesEnabled": false,
+          "transcodeConfigId": "tc-default",
+          "watermark": {
+            "animated": false,
+            "duration": 0,
+            "enabled": false,
+            "fixedSize": false,
+            "horizontalMargin": 1,
+            "opacity": 100,
+            "position": "bottom-right",
+            "url": "",
+            "verticalMargin": 1,
+            "width": 10
+          }
+        },
+        "type": "new"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels"
+    },
+    {
+      "body": {
+        "programs": [
+          "tunarr-movie-1155"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 0,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-000000000016",
+              "order": "chronological",
+              "type": "movie",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/00000000-0000-0000-0000-000000000015/programming"
+    },
+    {
+      "body": {
+        "channel": {
+          "disableFillerOverlay": false,
+          "duration": 0,
+          "fillerCollections": [],
+          "fillerRepeatCooldown": 30000,
+          "groupTitle": "tunarr",
+          "guideMinimumDuration": 30000,
+          "icon": {
+            "duration": 0,
+            "path": "",
+            "position": "bottom-right",
+            "width": 0
+          },
+          "id": "00000000-0000-0000-0000-000000000017",
+          "name": "Fargo (show)",
+          "number": 91,
+          "offline": {
+            "mode": "pic",
+            "picture": "",
+            "soundtrack": ""
+          },
+          "onDemand": {
+            "enabled": false
+          },
+          "startTime": 1767268800000,
+          "stealth": false,
+          "streamMode": "hls",
+          "subtitlesEnabled": false,
+          "transcodeConfigId": "tc-default",
+          "watermark": {
+            "animated": false,
+            "duration": 0,
+            "enabled": false,
+            "fixedSize": false,
+            "horizontalMargin": 1,
+            "opacity": 100,
+            "position": "bottom-right",
+            "url": "",
+            "verticalMargin": 1,
+            "width": 10
+          }
+        },
+        "type": "new"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels"
+    },
+    {
+      "body": {
+        "programs": [
+          "tunarr-ep-1142-1",
+          "tunarr-ep-1142-2",
+          "tunarr-ep-1142-3",
+          "tunarr-ep-1142-4"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 0,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-000000000018",
+              "order": "next",
+              "showId": "tunarr-show-1142",
+              "type": "show",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/00000000-0000-0000-0000-000000000017/programming"
+    },
+    {
+      "body": {
+        "channel": {
+          "disableFillerOverlay": false,
+          "duration": 0,
+          "fillerCollections": [],
+          "fillerRepeatCooldown": 30000,
+          "groupTitle": "tunarr",
+          "guideMinimumDuration": 30000,
+          "icon": {
+            "duration": 0,
+            "path": "",
+            "position": "bottom-right",
+            "width": 0
+          },
+          "id": "00000000-0000-0000-0000-000000000019",
+          "name": "Fargo (plain)",
+          "number": 92,
+          "offline": {
+            "mode": "pic",
+            "picture": "",
+            "soundtrack": ""
+          },
+          "onDemand": {
+            "enabled": false
+          },
+          "startTime": 1767268800000,
+          "stealth": false,
+          "streamMode": "hls",
+          "subtitlesEnabled": false,
+          "transcodeConfigId": "tc-default",
+          "watermark": {
+            "animated": false,
+            "duration": 0,
+            "enabled": false,
+            "fixedSize": false,
+            "horizontalMargin": 1,
+            "opacity": 100,
+            "position": "bottom-right",
+            "url": "",
+            "verticalMargin": 1,
+            "width": 10
+          }
+        },
+        "type": "new"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels"
+    },
+    {
+      "body": {
+        "programs": [
+          "tunarr-ep-1142-1",
+          "tunarr-ep-1142-2",
+          "tunarr-ep-1142-3",
+          "tunarr-ep-1142-4"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 0,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-00000000001a",
+              "order": "next",
+              "showId": "tunarr-show-1142",
+              "type": "show",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/00000000-0000-0000-0000-000000000019/programming"
+    },
+    {
+      "body": {
+        "channel": {
+          "disableFillerOverlay": false,
+          "duration": 0,
+          "fillerCollections": [],
+          "fillerRepeatCooldown": 30000,
+          "groupTitle": "tunarr",
+          "guideMinimumDuration": 30000,
+          "icon": {
+            "duration": 0,
+            "path": "",
+            "position": "bottom-right",
+            "width": 0
+          },
+          "id": "00000000-0000-0000-0000-00000000001b",
+          "name": "Action Classics",
+          "number": 93,
+          "offline": {
+            "mode": "pic",
+            "picture": "",
+            "soundtrack": ""
+          },
+          "onDemand": {
+            "enabled": false
+          },
+          "startTime": 1767268800000,
+          "stealth": false,
+          "streamMode": "hls",
+          "subtitlesEnabled": false,
+          "transcodeConfigId": "tc-default",
+          "watermark": {
+            "animated": false,
+            "duration": 0,
+            "enabled": false,
+            "fixedSize": false,
+            "horizontalMargin": 1,
+            "opacity": 100,
+            "position": "bottom-right",
+            "url": "",
+            "verticalMargin": 1,
+            "width": 10
+          }
+        },
+        "type": "new"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels"
+    },
+    {
+      "body": {
+        "programs": [
+          "tunarr-movie-1029",
+          "tunarr-movie-1026",
+          "tunarr-movie-1027",
+          "tunarr-movie-1033",
+          "tunarr-movie-1155",
+          "tunarr-ep-1142-1",
+          "tunarr-ep-1142-2",
+          "tunarr-ep-1142-3",
+          "tunarr-ep-1142-4"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 0,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-00000000001c",
+              "order": "shuffle",
+              "showId": "tunarr-show-1142",
+              "type": "show",
+              "weight": 1
+            },
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-00000000001d",
+              "order": "shuffle",
+              "type": "movie",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/00000000-0000-0000-0000-00000000001b/programming"
+    },
+    {
+      "body": {
+        "channel": {
+          "disableFillerOverlay": false,
+          "duration": 0,
+          "fillerCollections": [],
+          "fillerRepeatCooldown": 30000,
+          "groupTitle": "tunarr",
+          "guideMinimumDuration": 30000,
+          "icon": {
+            "duration": 0,
+            "path": "",
+            "position": "bottom-right",
+            "width": 0
+          },
+          "id": "00000000-0000-0000-0000-00000000001e",
+          "name": "Partly Synced",
+          "number": 94,
+          "offline": {
+            "mode": "pic",
+            "picture": "",
+            "soundtrack": ""
+          },
+          "onDemand": {
+            "enabled": false
+          },
+          "startTime": 1767268800000,
+          "stealth": false,
+          "streamMode": "hls",
+          "subtitlesEnabled": false,
+          "transcodeConfigId": "tc-default",
+          "watermark": {
+            "animated": false,
+            "duration": 0,
+            "enabled": false,
+            "fixedSize": false,
+            "horizontalMargin": 1,
+            "opacity": 100,
+            "position": "bottom-right",
+            "url": "",
+            "verticalMargin": 1,
+            "width": 10
+          }
+        },
+        "type": "new"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels"
+    },
+    {
+      "body": {
+        "programs": [
+          "tunarr-movie-1036"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 0,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-00000000001f",
+              "order": "shuffle",
+              "type": "movie",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/00000000-0000-0000-0000-00000000001e/programming"
+    },
+    {
+      "body": {
+        "channel": {
+          "disableFillerOverlay": false,
+          "duration": 0,
+          "fillerCollections": [],
+          "fillerRepeatCooldown": 30000,
+          "groupTitle": "tunarr",
+          "guideMinimumDuration": 30000,
+          "icon": {
+            "duration": 0,
+            "path": "",
+            "position": "bottom-right",
+            "width": 0
+          },
+          "id": "00000000-0000-0000-0000-000000000020",
+          "name": "Mad Max Saga",
+          "number": 96,
+          "offline": {
+            "mode": "pic",
+            "picture": "",
+            "soundtrack": ""
+          },
+          "onDemand": {
+            "enabled": false
+          },
+          "startTime": 1767268800000,
+          "stealth": false,
+          "streamMode": "hls",
+          "subtitlesEnabled": false,
+          "transcodeConfigId": "tc-default",
+          "watermark": {
+            "animated": false,
+            "duration": 0,
+            "enabled": false,
+            "fixedSize": false,
+            "horizontalMargin": 1,
+            "opacity": 100,
+            "position": "bottom-right",
+            "url": "",
+            "verticalMargin": 1,
+            "width": 10
+          }
+        },
+        "type": "new"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels"
+    },
+    {
+      "body": {
+        "programs": [
+          "tunarr-movie-1021",
+          "tunarr-movie-1040"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 0,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-000000000021",
+              "order": "chronological",
+              "type": "movie",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/00000000-0000-0000-0000-000000000020/programming"
+    },
+    {
+      "body": {
+        "channel": {
+          "disableFillerOverlay": false,
+          "duration": 0,
+          "fillerCollections": [
+            {
+              "cooldownSeconds": 30,
+              "id": "filler-90s",
+              "weight": 100
+            }
+          ],
+          "fillerRepeatCooldown": 30000,
+          "groupTitle": "tunarr",
+          "guideMinimumDuration": 30000,
+          "icon": {
+            "duration": 0,
+            "path": "",
+            "position": "bottom-right",
+            "width": 0
+          },
+          "id": "00000000-0000-0000-0000-000000000022",
+          "name": "Sitcoms With Ads",
+          "number": 97,
+          "offline": {
+            "mode": "pic",
+            "picture": "",
+            "soundtrack": ""
+          },
+          "onDemand": {
+            "enabled": false
+          },
+          "startTime": 1767268800000,
+          "stealth": false,
+          "streamMode": "hls",
+          "subtitlesEnabled": false,
+          "transcodeConfigId": "tc-default",
+          "watermark": {
+            "animated": false,
+            "duration": 0,
+            "enabled": false,
+            "fixedSize": false,
+            "horizontalMargin": 1,
+            "opacity": 100,
+            "position": "bottom-right",
+            "url": "",
+            "verticalMargin": 1,
+            "width": 10
+          }
+        },
+        "type": "new"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels"
+    },
+    {
+      "body": {
+        "programs": [
+          "tunarr-ep-1131-1",
+          "tunarr-ep-1131-2",
+          "tunarr-ep-1131-3",
+          "tunarr-ep-1131-4",
+          "tunarr-ep-1132-1",
+          "tunarr-ep-1132-2",
+          "tunarr-ep-1132-3",
+          "tunarr-ep-1132-4"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 300000,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-000000000023",
+              "order": "shuffle",
+              "showId": "tunarr-show-1131",
+              "type": "show",
+              "weight": 1
+            },
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-000000000024",
+              "order": "shuffle",
+              "showId": "tunarr-show-1132",
+              "type": "show",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/00000000-0000-0000-0000-000000000022/programming"
+    },
+    {
+      "body": {
+        "channel": {
+          "disableFillerOverlay": false,
+          "duration": 0,
+          "fillerCollections": [],
+          "fillerRepeatCooldown": 30000,
+          "groupTitle": "tunarr",
+          "guideMinimumDuration": 30000,
+          "icon": {
+            "duration": 0,
+            "path": "",
+            "position": "bottom-right",
+            "width": 0
+          },
+          "id": "00000000-0000-0000-0000-000000000025",
+          "name": "Interleaved",
+          "number": 98,
+          "offline": {
+            "mode": "pic",
+            "picture": "",
+            "soundtrack": ""
+          },
+          "onDemand": {
+            "enabled": false
+          },
+          "startTime": 1767268800000,
+          "stealth": false,
+          "streamMode": "hls",
+          "subtitlesEnabled": false,
+          "transcodeConfigId": "tc-default",
+          "watermark": {
+            "animated": false,
+            "duration": 0,
+            "enabled": false,
+            "fixedSize": false,
+            "horizontalMargin": 1,
+            "opacity": 100,
+            "position": "bottom-right",
+            "url": "",
+            "verticalMargin": 1,
+            "width": 10
+          }
+        },
+        "type": "new"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels"
+    },
+    {
+      "body": {
+        "programs": [
+          "tunarr-ep-1125-1",
+          "tunarr-ep-1125-2",
+          "tunarr-ep-1125-3",
+          "tunarr-ep-1125-4",
+          "tunarr-movie-1029",
+          "tunarr-movie-1026"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 0,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-000000000026",
+              "order": "next",
+              "showId": "tunarr-show-1125",
+              "type": "show",
+              "weight": 2
+            },
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-000000000027",
+              "order": "chronological",
+              "type": "movie",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/00000000-0000-0000-0000-000000000025/programming"
+    },
+    {
+      "body": {
+        "channel": {
+          "disableFillerOverlay": false,
+          "duration": 0,
+          "fillerCollections": [],
+          "fillerRepeatCooldown": 30000,
+          "groupTitle": "tunarr",
+          "guideMinimumDuration": 30000,
+          "icon": {
+            "duration": 0,
+            "path": "",
+            "position": "bottom-right",
+            "width": 0
+          },
+          "id": "00000000-0000-0000-0000-000000000028",
+          "name": "Timeline",
+          "number": 99,
+          "offline": {
+            "mode": "pic",
+            "picture": "",
+            "soundtrack": ""
+          },
+          "onDemand": {
+            "enabled": false
+          },
+          "startTime": 1767268800000,
+          "stealth": false,
+          "streamMode": "hls",
+          "subtitlesEnabled": false,
+          "transcodeConfigId": "tc-default",
+          "watermark": {
+            "animated": false,
+            "duration": 0,
+            "enabled": false,
+            "fixedSize": false,
+            "horizontalMargin": 1,
+            "opacity": 100,
+            "position": "bottom-right",
+            "url": "",
+            "verticalMargin": 1,
+            "width": 10
+          }
+        },
+        "type": "new"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels"
+    },
+    {
+      "body": {
+        "append": false,
+        "lineup": [
+          {
+            "duration": 5700000,
+            "id": "tunarr-movie-1029",
+            "type": "content"
+          },
+          {
+            "duration": 1320000,
+            "id": "tunarr-ep-1131-1",
+            "type": "content"
+          },
+          {
+            "duration": 1320000,
+            "id": "tunarr-ep-1131-3",
+            "type": "content"
+          },
+          {
+            "duration": 1320000,
+            "id": "tunarr-ep-1131-2",
+            "type": "content"
+          },
+          {
+            "duration": 1320000,
+            "id": "tunarr-ep-1131-4",
+            "type": "content"
+          }
+        ],
+        "type": "manual"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/00000000-0000-0000-0000-000000000028/programming"
+    },
+    {
+      "body": {
+        "channel": {
+          "disableFillerOverlay": false,
+          "duration": 0,
+          "fillerCollections": [],
+          "fillerRepeatCooldown": 30000,
+          "groupTitle": "tunarr",
+          "guideMinimumDuration": 30000,
+          "icon": {
+            "duration": 0,
+            "path": "",
+            "position": "bottom-right",
+            "width": 0
+          },
+          "id": "00000000-0000-0000-0000-000000000029",
+          "name": "Pinned Die Hard",
+          "number": 100,
+          "offline": {
+            "mode": "pic",
+            "picture": "",
+            "soundtrack": ""
+          },
+          "onDemand": {
+            "enabled": false
+          },
+          "startTime": 1767268800000,
+          "stealth": false,
+          "streamMode": "hls",
+          "subtitlesEnabled": false,
+          "transcodeConfigId": "tc-default",
+          "watermark": {
+            "animated": false,
+            "duration": 0,
+            "enabled": false,
+            "fixedSize": false,
+            "horizontalMargin": 1,
+            "opacity": 100,
+            "position": "bottom-right",
+            "url": "",
+            "verticalMargin": 1,
+            "width": 10
+          }
+        },
+        "type": "new"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels"
+    },
+    {
+      "body": {
+        "programs": [
+          "tunarr-movie-1029"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 0,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-00000000002a",
+              "order": "chronological",
+              "type": "movie",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/00000000-0000-0000-0000-000000000029/programming"
+    },
+    {
+      "body": {
+        "channel": {
+          "disableFillerOverlay": false,
+          "duration": 0,
+          "fillerCollections": [],
+          "fillerRepeatCooldown": 30000,
+          "groupTitle": "tunarr",
+          "guideMinimumDuration": 30000,
+          "icon": {
+            "duration": 0,
+            "path": "",
+            "position": "bottom-right",
+            "width": 0
+          },
+          "id": "00000000-0000-0000-0000-00000000002b",
+          "name": "Block",
+          "number": 120,
+          "offline": {
+            "mode": "pic",
+            "picture": "",
+            "soundtrack": ""
+          },
+          "onDemand": {
+            "enabled": false
+          },
+          "startTime": 1767268800000,
+          "stealth": false,
+          "streamMode": "hls",
+          "subtitlesEnabled": false,
+          "transcodeConfigId": "tc-default",
+          "watermark": {
+            "animated": false,
+            "duration": 0,
+            "enabled": false,
+            "fixedSize": false,
+            "horizontalMargin": 1,
+            "opacity": 100,
+            "position": "bottom-right",
+            "url": "",
+            "verticalMargin": 1,
+            "width": 10
+          }
+        },
+        "type": "new"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels"
+    },
+    {
+      "body": {
+        "programs": [
+          "tunarr-ep-1131-1",
+          "tunarr-ep-1131-2",
+          "tunarr-ep-1131-3",
+          "tunarr-ep-1131-4",
+          "tunarr-ep-1132-1",
+          "tunarr-ep-1132-2",
+          "tunarr-ep-1132-3",
+          "tunarr-ep-1132-4"
+        ],
+        "schedule": {
+          "flexPreference": "end",
+          "maxDays": 30,
+          "padMs": 0,
+          "padStyle": "episode",
+          "randomDistribution": "uniform",
+          "slots": [
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-00000000002c",
+              "order": "next",
+              "showId": "tunarr-show-1131",
+              "type": "show",
+              "weight": 1
+            },
+            {
+              "cooldownMs": 0,
+              "id": "00000000-0000-0000-0000-00000000002d",
+              "order": "next",
+              "showId": "tunarr-show-1132",
+              "type": "show",
+              "weight": 1
+            }
+          ],
+          "type": "random"
+        },
+        "type": "random"
+      },
+      "method": "POST",
+      "url": "http://tunarr.test:8000/api/channels/00000000-0000-0000-0000-00000000002b/programming"
+    }
+  ]
+}

@@ -23,6 +23,10 @@ data/*
 !demo/channels.json
 !demo/config.json
 
+# Plex snapshot tests' golden files (synthetic, committed on purpose — they're what
+# backend/tests/test_plex_snapshots*.py compare against). Re-include them too.
+!backend/tests/snapshots/**
+
 # Python
 __pycache__/
 *.pyc
