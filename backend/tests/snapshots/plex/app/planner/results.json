@@ -1,0 +1,63 @@
+{
+  "apply_collections": {
+    "added": 1,
+    "ok": true
+  },
+  "collections": [
+    {
+      "count": 6,
+      "has_poster": true,
+      "id": "9001",
+      "name": "Snapshot Action Classics",
+      "section": "Movies",
+      "summary": "Explosions, mostly."
+    },
+    {
+      "count": 2,
+      "has_poster": false,
+      "id": "9002",
+      "name": "Snapshot Partly Synced",
+      "section": "Movies",
+      "summary": ""
+    }
+  ],
+  "libraries": [
+    {
+      "key": "plex:1",
+      "server": "Your Library",
+      "title": "Movies",
+      "type": "movie"
+    },
+    {
+      "key": "plex:2",
+      "server": "Your Library",
+      "title": "TV Shows",
+      "type": "show"
+    }
+  ],
+  "poster": {
+    "body": "PNG-poster-9001",
+    "media_type": "image/png"
+  },
+  "poster_missing": 502,
+  "test_connection": {
+    "plex": {
+      "ok": true,
+      "status": 200,
+      "url": "http://plex.test:32400"
+    },
+    "tunarr": {
+      "ok": true,
+      "status": 200,
+      "url": "http://tunarr.test:8000"
+    }
+  },
+  "test_connection_bad_token": {
+    "plex": {
+      "error": "Authentication failed (401). Plex rejected the token.",
+      "ok": false,
+      "status": 401,
+      "url": "http://plex.test:32400"
+    }
+  }
+}

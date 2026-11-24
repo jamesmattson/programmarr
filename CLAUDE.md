@@ -112,6 +112,11 @@ Each test seeds a temp `DATA_DIR` with a synthetic `plex_library.csv` (the `seed
 `conftest.py`) — nothing touches a real Plex/Tunarr. Covers `library_facets`, `compose_channels`,
 `validate(append=True)`, `discover_prompt`, and `generate_no_ai`.
 
+**Plex snapshots** (`test_plex_snapshots.py` for the CLI scripts, `test_plex_snapshots_app.py` for
+the web routes + scheduler; the Plex rule for #36): a Jellyfin/Emby PR must pass them **unchanged**.
+Rewrite with `pytest --update-snapshots` only for an intended Plex output change, and call it out in
+the PR. How they work: the files' docstrings.
+
 **Environments:** **localhost:7979** = local Docker before pushing. **TrueNAS** = production,
 runs `ghcr.io/jamesmattson/programmarr:latest` with Watchtower (`:latest` moves only when
 a GitHub Release is cut — not on a master push; Watchtower picks it up shortly after).
@@ -119,6 +124,8 @@ a GitHub Release is cut — not on a master push; Watchtower picks it up shortly
 **Demo dataset:** `python scripts/make_demo_data.py` (re)generates the committed `demo/` dir
 (synthetic `plex_library.csv` + `channels.json` + safe `config.json`) used for deterministic doc
 screenshots. See the script's header for usage and which pages render offline.
+Regenerating it also changes the Plex snapshots (they're built from it) — rerun with
+`--update-snapshots` in the same commit.
 
 ## Workflow
 

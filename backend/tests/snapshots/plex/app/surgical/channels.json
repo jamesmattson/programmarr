@@ -1,0 +1,55 @@
+{
+  "channels": [
+    {
+      "content": [
+        "Cheers",
+        "Frasier"
+      ],
+      "name": "Cheers 24/7",
+      "number": 11,
+      "shuffle": "ordered"
+    },
+    {
+      "content": [
+        "Frasier"
+      ],
+      "name": "Frasier 24/7",
+      "number": 12,
+      "shuffle": "ordered"
+    },
+    {
+      "content": [
+        "Die Hard"
+      ],
+      "name": "Hand Made",
+      "number": 40,
+      "shuffle": "shuffle"
+    },
+    {
+      "content": [
+        {
+          "collection": "Snapshot Action Classics"
+        }
+      ],
+      "name": "Action Classics",
+      "number": 52,
+      "shuffle": "shuffle"
+    },
+    {
+      "content": [
+        {
+          "exclude": [],
+          "match": "title_contains",
+          "order": "release_date",
+          "value": "Mad Max"
+        }
+      ],
+      "live": true,
+      "name": "Mad Max Saga",
+      "number": 53,
+      "shuffle": "ordered"
+    }
+  ],
+  "orphaned": [],
+  "suggested_channels": []
+}

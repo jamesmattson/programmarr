@@ -12,6 +12,19 @@ All notable changes to Programmarr are documented here. This project follows
   same count were listed in a different order after each restart (it followed Python's
   hash seed); ties are now sorted by title.
 
+### Notes
+
+- **Plex snapshot tests** (#36). What a Plex user gets out of Programmarr is now saved under
+  `backend/tests/snapshots/plex/` and compared on every test run, so the coming Jellyfin/Emby
+  PRs can show that Plex output is unchanged instead of just saying so: the export and the
+  Planner facets built from it; deploys from the CLI, the Planner (Nuke and Add/Edit) and Save
+  and Apply (every write sent to Tunarr, the pre-delete backup, what `channels.json` and
+  `planner_state.json` end up holding); live-channel updates; guide sync; collection channels;
+  the Planner's library picker, collection list and connection test; with two Plex servers;
+  and with Tunarr's basic auth turned on. How many times each Plex request is made is pinned
+  too, so a change can't quietly add Plex calls. No behavior change. `pytest --update-snapshots` rewrites them when a
+  change is meant to alter Plex output.
+
 ## [0.9.1] — 2026-11-23
 
 ### Security

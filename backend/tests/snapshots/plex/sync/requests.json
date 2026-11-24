@@ -1,0 +1,26 @@
+{
+  "plex_requests": {
+    "GET http://plex.test:32400/livetv/dvrs": 2,
+    "PUT http://plex.test:32400/livetv/dvrs/dvr-1/devices/dev-1": 1
+  },
+  "writes": [
+    {
+      "body": {
+        "channelMappings[C10.97.tunarr.com].deviceIdentifier": "10",
+        "channelMappings[C10.97.tunarr.com].enabled": "1",
+        "channelMappings[C10.97.tunarr.com].lineupIdentifier": "10",
+        "channelMappings[C11.97.tunarr.com].deviceIdentifier": "11",
+        "channelMappings[C11.97.tunarr.com].enabled": "1",
+        "channelMappings[C11.97.tunarr.com].lineupIdentifier": "11",
+        "channelMappings[C12.97.tunarr.com].deviceIdentifier": "12",
+        "channelMappings[C12.97.tunarr.com].enabled": "1",
+        "channelMappings[C12.97.tunarr.com].lineupIdentifier": "12",
+        "channelMappings[C20.97.tunarr.com].deviceIdentifier": "20",
+        "channelMappings[C20.97.tunarr.com].enabled": "1",
+        "channelMappings[C20.97.tunarr.com].lineupIdentifier": "20"
+      },
+      "method": "PUT",
+      "url": "http://plex.test:32400/livetv/dvrs/dvr-1/devices/dev-1"
+    }
+  ]
+}

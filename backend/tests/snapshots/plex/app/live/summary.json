@@ -1,0 +1,45 @@
+{
+  "apply": true,
+  "changed": 2,
+  "changes": [
+    {
+      "added": [
+        "Fargo x5",
+        "Aliens",
+        "Die Hard",
+        "Predator",
+        "Speed"
+      ],
+      "added_count": 9,
+      "applied": true,
+      "name": "Action Classics",
+      "number": 93,
+      "removed_count": 0
+    },
+    {
+      "added": [
+        "Mad Max: Fury Road"
+      ],
+      "added_count": 1,
+      "applied": true,
+      "name": "Mad Max Saga",
+      "number": 96,
+      "removed_count": 0
+    }
+  ],
+  "error": null,
+  "live": 5,
+  "skipped": [
+    {
+      "name": "Frasier 24/7",
+      "number": 12,
+      "reason": "name mismatch — Tunarr #12 is 'Renamed In Tunarr', record expects 'Frasier 24/7'; refusing to overwrite (out of sync)"
+    },
+    {
+      "name": "Not In Tunarr",
+      "number": 14,
+      "reason": "not in Tunarr"
+    }
+  ],
+  "time": "2026-01-01T12:00:00+00:00"
+}

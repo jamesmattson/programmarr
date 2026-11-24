@@ -1,0 +1,30 @@
+{
+  "channels": [
+    {
+      "content": [
+        {
+          "collection": "Snapshot Action Classics"
+        }
+      ],
+      "name": "Action Classics",
+      "number": 93,
+      "shuffle": "shuffle"
+    },
+    {
+      "content": [
+        {
+          "ids": {
+            "plex": "src-plex:1029",
+            "tmdb": "7203",
+            "tunarr": "tunarr-movie-1029"
+          },
+          "movie": "Die Hard",
+          "year": 1988
+        }
+      ],
+      "name": "Pinned Die Hard",
+      "number": 100,
+      "shuffle": "ordered"
+    }
+  ]
+}

@@ -1,0 +1,655 @@
+{
+  "actors": [
+    {
+      "count": 27,
+      "value": "Frances McDormand"
+    },
+    {
+      "count": 27,
+      "value": "Leonardo DiCaprio"
+    },
+    {
+      "count": 27,
+      "value": "Scarlett Johansson"
+    },
+    {
+      "count": 26,
+      "value": "Samuel L. Jackson"
+    },
+    {
+      "count": 25,
+      "value": "Denzel Washington"
+    },
+    {
+      "count": 25,
+      "value": "Tom Hanks"
+    },
+    {
+      "count": 24,
+      "value": "Brad Pitt"
+    },
+    {
+      "count": 24,
+      "value": "Cate Blanchett"
+    },
+    {
+      "count": 24,
+      "value": "Florence Pugh"
+    },
+    {
+      "count": 24,
+      "value": "Idris Elba"
+    },
+    {
+      "count": 24,
+      "value": "Michael B. Jordan"
+    },
+    {
+      "count": 24,
+      "value": "Oscar Isaac"
+    },
+    {
+      "count": 24,
+      "value": "Saoirse Ronan"
+    },
+    {
+      "count": 24,
+      "value": "Tilda Swinton"
+    },
+    {
+      "count": 24,
+      "value": "Viola Davis"
+    }
+  ],
+  "blends": [
+    {
+      "count": 11,
+      "displays": [
+        "Action",
+        "Sci-Fi"
+      ],
+      "genres": [
+        "Action",
+        "Science Fiction"
+      ]
+    },
+    {
+      "count": 8,
+      "displays": [
+        "Comedy",
+        "Romance"
+      ],
+      "genres": [
+        "Comedy",
+        "Romance"
+      ]
+    },
+    {
+      "count": 6,
+      "displays": [
+        "Action",
+        "Thriller"
+      ],
+      "genres": [
+        "Action",
+        "Thriller"
+      ]
+    },
+    {
+      "count": 6,
+      "displays": [
+        "Drama",
+        "Sci-Fi"
+      ],
+      "genres": [
+        "Drama",
+        "Science Fiction"
+      ]
+    }
+  ],
+  "countries": [
+    {
+      "count": 49,
+      "value": "United States of America"
+    },
+    {
+      "count": 26,
+      "value": "United Kingdom"
+    },
+    {
+      "count": 25,
+      "value": "France"
+    },
+    {
+      "count": 24,
+      "value": "Japan"
+    }
+  ],
+  "decades": [
+    {
+      "count": 3,
+      "end": 1979,
+      "label": "70s",
+      "start": 1970
+    },
+    {
+      "count": 27,
+      "end": 1989,
+      "label": "80s",
+      "start": 1980
+    },
+    {
+      "count": 29,
+      "end": 1999,
+      "label": "90s",
+      "start": 1990
+    },
+    {
+      "count": 28,
+      "end": 2009,
+      "label": "2000s",
+      "start": 2000
+    },
+    {
+      "count": 33,
+      "end": 2019,
+      "label": "2010s",
+      "start": 2010
+    },
+    {
+      "count": 6,
+      "end": 2029,
+      "label": "2020s",
+      "start": 2020
+    }
+  ],
+  "directors": [
+    {
+      "count": 13,
+      "value": "Christopher Nolan"
+    },
+    {
+      "count": 13,
+      "value": "Martin Scorsese"
+    },
+    {
+      "count": 13,
+      "value": "Quentin Tarantino"
+    },
+    {
+      "count": 13,
+      "value": "Steven Spielberg"
+    },
+    {
+      "count": 12,
+      "value": "Denis Villeneuve"
+    },
+    {
+      "count": 12,
+      "value": "Greta Gerwig"
+    },
+    {
+      "count": 12,
+      "value": "Jordan Peele"
+    },
+    {
+      "count": 12,
+      "value": "Kathryn Bigelow"
+    },
+    {
+      "count": 12,
+      "value": "Ridley Scott"
+    },
+    {
+      "count": 12,
+      "value": "The Coen Brothers"
+    }
+  ],
+  "exists": true,
+  "genre_decade": [
+    {
+      "count": 9,
+      "decade_label": "80s",
+      "decade_start": 1980,
+      "display": "Action",
+      "genre": "Action"
+    },
+    {
+      "count": 9,
+      "decade_label": "80s",
+      "decade_start": 1980,
+      "display": "Sci-Fi",
+      "genre": "Science Fiction"
+    },
+    {
+      "count": 9,
+      "decade_label": "80s",
+      "decade_start": 1980,
+      "display": "Horror",
+      "genre": "Horror"
+    },
+    {
+      "count": 7,
+      "decade_label": "80s",
+      "decade_start": 1980,
+      "display": "Comedy",
+      "genre": "Comedy"
+    },
+    {
+      "count": 11,
+      "decade_label": "90s",
+      "decade_start": 1990,
+      "display": "Comedy",
+      "genre": "Comedy"
+    },
+    {
+      "count": 8,
+      "decade_label": "90s",
+      "decade_start": 1990,
+      "display": "Action",
+      "genre": "Action"
+    },
+    {
+      "count": 7,
+      "decade_label": "90s",
+      "decade_start": 1990,
+      "display": "Drama",
+      "genre": "Drama"
+    },
+    {
+      "count": 8,
+      "decade_label": "2000s",
+      "decade_start": 2000,
+      "display": "Drama",
+      "genre": "Drama"
+    },
+    {
+      "count": 7,
+      "decade_label": "2000s",
+      "decade_start": 2000,
+      "display": "Action",
+      "genre": "Action"
+    },
+    {
+      "count": 6,
+      "decade_label": "2000s",
+      "decade_start": 2000,
+      "display": "Comedy",
+      "genre": "Comedy"
+    },
+    {
+      "count": 6,
+      "decade_label": "2000s",
+      "decade_start": 2000,
+      "display": "Animation",
+      "genre": "Animation"
+    },
+    {
+      "count": 16,
+      "decade_label": "2010s",
+      "decade_start": 2010,
+      "display": "Drama",
+      "genre": "Drama"
+    },
+    {
+      "count": 10,
+      "decade_label": "2010s",
+      "decade_start": 2010,
+      "display": "Sci-Fi",
+      "genre": "Science Fiction"
+    },
+    {
+      "count": 6,
+      "decade_label": "2010s",
+      "decade_start": 2010,
+      "display": "Action",
+      "genre": "Action"
+    },
+    {
+      "count": 6,
+      "decade_label": "2010s",
+      "decade_start": 2010,
+      "display": "Horror",
+      "genre": "Horror"
+    }
+  ],
+  "genres": {
+    "canonical": [
+      {
+        "count": 29,
+        "display": "Comedy",
+        "tag": "Comedy"
+      },
+      {
+        "count": 31,
+        "display": "Action",
+        "tag": "Action"
+      },
+      {
+        "count": 19,
+        "display": "Horror",
+        "tag": "Horror"
+      },
+      {
+        "count": 30,
+        "display": "Sci-Fi",
+        "tag": "Science Fiction"
+      },
+      {
+        "count": 34,
+        "display": "Drama",
+        "tag": "Drama"
+      },
+      {
+        "count": 10,
+        "display": "Animation",
+        "tag": "Animation"
+      },
+      {
+        "count": 8,
+        "display": "Documentary",
+        "tag": "Documentary"
+      }
+    ],
+    "more": [
+      {
+        "count": 15,
+        "display": "Thriller",
+        "tag": "Thriller"
+      },
+      {
+        "count": 11,
+        "display": "Crime",
+        "tag": "Crime"
+      },
+      {
+        "count": 11,
+        "display": "Romance",
+        "tag": "Romance"
+      },
+      {
+        "count": 7,
+        "display": "Fantasy",
+        "tag": "Fantasy"
+      },
+      {
+        "count": 7,
+        "display": "Western",
+        "tag": "Western"
+      }
+    ]
+  },
+  "marathon_count": 22,
+  "marathons": [
+    {
+      "episodes": 768,
+      "seasons": 35,
+      "title": "The Simpsons"
+    },
+    {
+      "episodes": 275,
+      "seasons": 11,
+      "title": "Cheers"
+    },
+    {
+      "episodes": 264,
+      "seasons": 11,
+      "title": "Frasier"
+    },
+    {
+      "episodes": 236,
+      "seasons": 10,
+      "title": "Friends"
+    },
+    {
+      "episodes": 218,
+      "seasons": 11,
+      "title": "The X-Files"
+    },
+    {
+      "episodes": 201,
+      "seasons": 9,
+      "title": "The Office"
+    },
+    {
+      "episodes": 180,
+      "seasons": 9,
+      "title": "Seinfeld"
+    },
+    {
+      "episodes": 170,
+      "seasons": 16,
+      "title": "It's Always Sunny in Philadelphia"
+    },
+    {
+      "episodes": 146,
+      "seasons": 14,
+      "title": "Archer"
+    },
+    {
+      "episodes": 140,
+      "seasons": 8,
+      "title": "Futurama"
+    },
+    {
+      "episodes": 126,
+      "seasons": 7,
+      "title": "Parks and Recreation"
+    },
+    {
+      "episodes": 121,
+      "seasons": 6,
+      "title": "Lost"
+    },
+    {
+      "episodes": 92,
+      "seasons": 7,
+      "title": "Mad Men"
+    },
+    {
+      "episodes": 86,
+      "seasons": 6,
+      "title": "The Sopranos"
+    },
+    {
+      "episodes": 77,
+      "seasons": 6,
+      "title": "BoJack Horseman"
+    },
+    {
+      "episodes": 73,
+      "seasons": 8,
+      "title": "Game of Thrones"
+    },
+    {
+      "episodes": 71,
+      "seasons": 7,
+      "title": "Rick and Morty"
+    },
+    {
+      "episodes": 63,
+      "seasons": 6,
+      "title": "Better Call Saul"
+    },
+    {
+      "episodes": 62,
+      "seasons": 5,
+      "title": "Breaking Bad"
+    },
+    {
+      "episodes": 61,
+      "seasons": 3,
+      "title": "Avatar: The Last Airbender"
+    },
+    {
+      "episodes": 60,
+      "seasons": 5,
+      "title": "The Wire"
+    },
+    {
+      "episodes": 51,
+      "seasons": 5,
+      "title": "Fargo"
+    },
+    {
+      "episodes": 48,
+      "seasons": 3,
+      "title": "Twin Peaks"
+    },
+    {
+      "episodes": 34,
+      "seasons": 4,
+      "title": "Stranger Things"
+    },
+    {
+      "episodes": 30,
+      "seasons": 4,
+      "title": "True Detective"
+    },
+    {
+      "episodes": 26,
+      "seasons": 2,
+      "title": "Cosmos"
+    },
+    {
+      "episodes": 17,
+      "seasons": 2,
+      "title": "Planet Earth"
+    },
+    {
+      "episodes": 15,
+      "seasons": 4,
+      "title": "Sherlock"
+    },
+    {
+      "episodes": 10,
+      "seasons": 1,
+      "title": "Band of Brothers"
+    },
+    {
+      "episodes": 5,
+      "seasons": 1,
+      "title": "Chernobyl"
+    }
+  ],
+  "min_items": 5,
+  "moods": [
+    {
+      "count": 25,
+      "value": "Bleak"
+    },
+    {
+      "count": 25,
+      "value": "Brooding"
+    },
+    {
+      "count": 25,
+      "value": "Tense"
+    },
+    {
+      "count": 25,
+      "value": "Witty"
+    }
+  ],
+  "movies": 126,
+  "networks": [],
+  "studios": [
+    {
+      "count": 16,
+      "value": "A24"
+    },
+    {
+      "count": 16,
+      "value": "Paramount Pictures"
+    },
+    {
+      "count": 16,
+      "value": "Universal Pictures"
+    },
+    {
+      "count": 16,
+      "value": "Warner Bros."
+    },
+    {
+      "count": 15,
+      "value": "20th Century Studios"
+    },
+    {
+      "count": 15,
+      "value": "Blumhouse"
+    },
+    {
+      "count": 15,
+      "value": "New Line Cinema"
+    },
+    {
+      "count": 15,
+      "value": "Walt Disney Pictures"
+    }
+  ],
+  "styles": [
+    {
+      "count": 26,
+      "value": "Buddy Film"
+    },
+    {
+      "count": 25,
+      "value": "Film Noir"
+    },
+    {
+      "count": 24,
+      "value": "Ensemble Film"
+    }
+  ],
+  "themes": [],
+  "tv_genres": [
+    {
+      "count": 15,
+      "genre": "Drama"
+    },
+    {
+      "count": 12,
+      "genre": "Comedy"
+    },
+    {
+      "count": 6,
+      "genre": "Animation"
+    },
+    {
+      "count": 6,
+      "genre": "Crime"
+    },
+    {
+      "count": 3,
+      "genre": "Science Fiction"
+    }
+  ],
+  "tv_movie_genres": [
+    {
+      "genre": "Drama",
+      "movie_count": 34,
+      "tv_count": 15
+    },
+    {
+      "genre": "Comedy",
+      "movie_count": 29,
+      "tv_count": 12
+    },
+    {
+      "genre": "Science Fiction",
+      "movie_count": 30,
+      "tv_count": 3
+    },
+    {
+      "genre": "Crime",
+      "movie_count": 11,
+      "tv_count": 6
+    },
+    {
+      "genre": "Animation",
+      "movie_count": 10,
+      "tv_count": 6
+    }
+  ],
+  "tv_shows": 30
+}

@@ -1,0 +1,30 @@
+{
+  "channels": [
+    {
+      "channel": {
+        "id": "old-hand-built",
+        "name": "Hand Built",
+        "number": 5
+      },
+      "programming": {
+        "lineup": [],
+        "programs": {},
+        "totalPrograms": 0
+      }
+    },
+    {
+      "channel": {
+        "id": "old-simpsons",
+        "name": "Old Simpsons",
+        "number": 10
+      },
+      "programming": {
+        "lineup": [],
+        "programs": {},
+        "totalPrograms": 0
+      }
+    }
+  ],
+  "saved_at": "20260101T120000Z",
+  "tunarr_url": "http://tunarr.test:8000"
+}
