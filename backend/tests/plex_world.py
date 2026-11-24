@@ -371,13 +371,17 @@ class World:
         body = self._decode_body(data, headers)
         self.requests.append({"method": method, "url": self._public_url(url), "body": body})
 
+        lower = {k.lower(): v for k, v in headers.items()}
         for srv in self.servers:
             if origin == srv.url:
-                if query.get("X-Plex-Token") != [srv.token]:
+                # Real Plex takes the token as a query parameter or an X-Plex-Token
+                # header; Programmarr sends both forms, depending on the call.
+                if (query.get("X-Plex-Token") != [srv.token]
+                        and lower.get("x-plex-token") != srv.token):
                     raise _http_error(url, 401)
                 return self._plex(srv, method, parts.path, body, url)
         if origin == TUNARR_URL:
-            sent = {k.lower(): v for k, v in headers.items()}.get("authorization")
+            sent = lower.get("authorization")
             if self.tunarr_auth and sent != self.tunarr_auth:
                 raise _http_error(url, 401)
             return self._tunarr(method, parts.path, body)

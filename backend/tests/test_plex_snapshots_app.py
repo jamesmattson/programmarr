@@ -219,12 +219,6 @@ def test_live_channel_cycle(app, snapshot, auth):
     assert not [w for w in world.writes() if w["method"] == "DELETE"]
     assert not any(w["url"].endswith("/api/channels") for w in world.writes()), \
         "a live update must never create a channel"
-    # scheduler._summarize counts titles from a set of ids, so titles with the same
-    # count come out in hash order, which changes from one Python process to the next.
-    # Sort them so the snapshot is stable; the counts and titles are still pinned.
-    # (jamesmattson/programmarr#45 — once fixed in the app, this sort can go.)
-    for change in summary["changes"]:
-        change["added"] = sorted(change["added"])
     snapshot("plex/app/live/summary.json", summary)
     snapshot("plex/app/live/requests.json", world.outputs())
     snapshot("plex/app/live/recipe_state.json", app.read("recipe_state.json"))

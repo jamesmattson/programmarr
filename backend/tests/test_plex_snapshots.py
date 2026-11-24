@@ -61,13 +61,7 @@ def test_fake_tunarr_rejects_a_request_without_auth():
 
 @pytest.mark.parametrize("auth", [
     pytest.param(False, id="no_auth"),
-    # Known bug, not this PR's to fix: export.py never calls
-    # set_tunarr_auth_from_config, so against a Tunarr with auth on every Tunarr call
-    # gets a 401 and the cross-reference is silently skipped (unsynced titles
-    # exported, Tunarr-only ones dropped). strict: the fix makes this pass, and then
-    # the marker must go.
-    pytest.param(True, id="with_tunarr_auth", marks=pytest.mark.xfail(
-        strict=True, reason="export.py doesn't send Tunarr auth (jamesmattson/programmarr#46)")),
+    pytest.param(True, id="with_tunarr_auth"),
 ])
 def test_export_output_is_unchanged(run, snapshot, auth):
     import export
